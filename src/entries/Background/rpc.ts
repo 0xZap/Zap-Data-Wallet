@@ -1238,8 +1238,8 @@ async function handleRunDynamicProofCSRequest(request: BackgroundAction) {
 
   const onProofRequest = async (req: any) => {
     console.log("onProofRequest", req);
-    // if (req.type !== SidePanelActionTypes.execute_dynamic_proof_response)
-    //   return;
+    if (req.type !== SidePanelActionTypes.execute_dynamic_proof_response)
+      return;
     // if (req.data.type !== type) return;
 
     if (req.data.error) defer.reject(req.data.error);

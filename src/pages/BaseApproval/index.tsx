@@ -30,7 +30,7 @@ export function BaseApproval({
       <div className="flex flex-row w-full gap-6 p-6">
         {!!onSecondaryClick && !!secondaryCTAText && (
           <ZapButton
-            className="flex-1 py-2 text-lightcolor"
+            className="flex-1 py-2 text-darkcolor"
             onClick={onSecondaryClick}
           >
             {secondaryCTAText}
@@ -38,7 +38,7 @@ export function BaseApproval({
         )}
         {!!onPrimaryClick && !!primaryCTAText && (
           <ZapButton
-            className="flex-1 py-2 text-lightcolor"
+            className="flex-1 py-2 text-darkcolor"
             onClick={onPrimaryClick}
           >
             {primaryCTAText}

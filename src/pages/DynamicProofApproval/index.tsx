@@ -74,11 +74,12 @@ export function DynamicProofApproval(): ReactElement {
 
       await browser.storage.local.set({ dynamic_type: type });
 
-      // @ts-ignore
-      if (chrome.sidePanel) await chrome.sidePanel.open({ tabId: tab.id });
       chrome.sidePanel.setOptions({
         enabled: true,
       });
+
+      // @ts-ignore
+      if (chrome.sidePanel) await chrome.sidePanel.open({ tabId: tab.id });
 
       browser.runtime.sendMessage({
         type: BackgroundActiontype.run_dynamic_proof_response,

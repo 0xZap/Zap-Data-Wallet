@@ -318,11 +318,9 @@ function RequestBody(props: {
       //   data: transactionData,
       // });
 
-      // set delay 4s
-      await new Promise((resolve) => setTimeout(resolve, 4000));
+      setLoading(false);
     } catch (error) {
       console.error("Error: ", error);
-    } finally {
       setLoading(false);
     }
   }, [req]);
@@ -352,7 +350,7 @@ function RequestBody(props: {
   }
 
   return (
-    <div className="flex flex-col px-4 pt-4 pb-12">
+    <div className="flex flex-col px-4">
       {/* <div className="flex flex-row items-center gap-4">
         <img className="w-12 h-12 self-start" src={icon || DefaultPluginIcon} />
         <div className="flex flex-col w-full items-start">
@@ -362,7 +360,7 @@ function RequestBody(props: {
           <div className="text-slate-500 text-sm">{description}</div>
         </div>
       </div> */}
-      <div className="flex flex-col items-start gap-8 mt-8">
+      <div className="flex flex-col items-start gap-6 mt-8">
         {/* {steps?.map((step, i) => (
           <StepContent
             hash={hash}
@@ -392,8 +390,8 @@ function RequestBody(props: {
           />
         ))}
       </div>
-      <div className="w-full flex flex-col items-start gap-8 mt-8">
-        <div className="w-full p-4 flex flex-col gap-3 flex-nowrap border-[1px] border-primary rounded-md">
+      <div className="w-full flex flex-col items-start gap-4 mt-6">
+        <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px] border-primary rounded-md">
           <p className="text-lightcolor truncate">
             <span className="font-bold">Transaction ID: </span>
             {txId}
@@ -414,14 +412,14 @@ function RequestBody(props: {
             {txProof}
           </p>
         </div>
-        <div className="flex flex-row gap-4 text-base w-full">
+        <div className="flex flex-row text-base w-full">
           {/* <div className="text-lightcolor self-start">
             {steps[type]?.length + 1}
           </div> */}
           <div className="flex flex-col flex-grow flex-shrink w-0">
             <ZapButton
               onClick={handleSendProof}
-              className="w-full text-sm py-2 mt-4 text-darkcolor"
+              className="w-full text-sm py-2 text-darkcolor"
             >
               Send Proof to Z2Z
             </ZapButton>
@@ -489,7 +487,7 @@ function StepContent(
         // Dummy function for Notarize
       } else if (action === "Verify") {
         console.log("Verify action triggered");
-        handleNotarizeRequest();
+        await handleNotarizeRequest();
         setCompleted(true);
         setProcessStepId(processStepId + 1);
         // Dummy function for Verify
@@ -505,6 +503,7 @@ function StepContent(
       if (action === "Link" && !pending && !completed) {
         const urlRegex = url ? new RegExp(url) : null;
         if (urlRegex && urlRegex.test(currentUrl)) {
+          setError("");
           setCompleted(true);
           setProcessStepId(processStepId + 1);
         }
@@ -538,7 +537,7 @@ function StepContent(
         <ZapButton
           onClick={handleClick}
           disabled={completed || pending || loading}
-          loading={loading}
+          loading={loading && action === "Verify"}
           className={`w-full text-sm py-2 mt-4 text-darkcolor ${
             completed
               ? "disabled:bg-green-300 disabled:hover:bg-green-300 disabled:text-gray-500"

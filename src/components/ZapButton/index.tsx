@@ -1,5 +1,5 @@
 import React from "react";
-import { RefreshCw } from "react-feather";
+import { RotateCw } from "react-feather";
 //@ts-ignore
 import { twMerge } from "tailwind-merge";
 
@@ -23,7 +23,7 @@ const ZapButton: React.FC<ZapButtonProps> = ({
     <button className={mergedClassName} {...rest}>
       {loading ? (
         <div className="flex flex-row items-center justify-center">
-          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+          <RotateCw className="mr-2 h-4 w-4 animate-spin" />
           Please wait
         </div>
       ) : (
