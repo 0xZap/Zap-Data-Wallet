@@ -484,6 +484,8 @@ function StepContent(
         }
       } else if (action === "Notarize") {
         console.log("Notarize action triggered");
+        setCompleted(true);
+        setProcessStepId(processStepId + 1);
         // Dummy function for Notarize
       } else if (action === "Verify") {
         console.log("Verify action triggered");

@@ -30,6 +30,13 @@ export const metadataList: metadataListType = {
     proofRegex: "https://app.revolut.com/api/retail/transaction/\\S+",
     description: "This is a revolut transaction proof",
   },
+  luma: {
+    icon: "",
+    name: "Luma Event",
+    url: "https://lu.ma/home",
+    proofRegex: "https://api.lu.ma/user/ping",
+    description: "This is a luma event proof",
+  },
 };
 
 export function DynamicProofApproval(): ReactElement {
