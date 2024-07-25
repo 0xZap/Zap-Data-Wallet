@@ -32,6 +32,7 @@ import { urlify } from "../../utils/misc";
 import store from "../../utils/store";
 import { useDispatch } from "react-redux";
 import axios from "axios";
+import { prove, verify, set_logging_filter } from 'tlsn-js';
 
 export type StepConfig = {
   title: string;
@@ -70,12 +71,42 @@ const stepsRevolut: StepConfig[] = [
   },
 ];
 
+const stepsLuma: StepConfig[] = [
+  {
+    title: "Access Luma Account",
+    description: "Login with your credentials",
+    cta: "Check Luma Access",
+    action: "Ping",
+    url: "https://api.lu.ma/user/ping",
+  },
+  {
+    title: "Proof Event Participation",
+    description: "Go to your event details",
+    cta: "Check Event Info",
+    action: "NotarizeLuma",
+    url: "^https://lu\\.ma/home$",
+  },
+  // {
+  //   title: "Step 3",
+  //   description: "Description 3",
+  //   cta: "Notarize Request",
+  //   action: "Notarize",
+  // },
+  // {
+  //   title: "Verify Proof",
+  //   description: "Verify the notarized data received",
+  //   cta: "Verify",
+  //   action: "VerifyLuma",
+  // },
+];
+
 type stepsType = {
   [key: string]: StepConfig[];
 };
 
 const steps: stepsType = {
   revolut: stepsRevolut,
+  luma: stepsLuma,
 };
 
 export default function SidePanel(): ReactElement {
@@ -187,6 +218,11 @@ function RequestBody(props: {
   const [filteredRequests, setFilteredRequests] = useState<RequestLog[]>([]);
   const req = useRequest(requestId);
   const [loading, setLoading] = useState(false);
+
+
+  const [userLumaId, setUserLumaId] = useState<string | undefined>();
+  const [userLumaProof, setUserLumaProof] = useState<any | undefined>();
+
   //   const { title, description, icon, steps } = props.config;
   //   const [responses, setResponses] = useState<any[]>([]);
   //   const [notarizationId, setNotarizationId] = useState("");
@@ -261,6 +297,125 @@ function RequestBody(props: {
     };
   }, []);
 
+  const handleLumaPing = useCallback(async () => {
+    setLoading(true);
+    if (!filteredRequests || filteredRequests.length === 0) return;
+
+    if (!req) return;
+
+    console.log("headers: ", req.requestHeaders);
+    const hostname = urlify(req.url)?.hostname;
+
+
+    const headers: { [k: string]: string } = req.requestHeaders.reduce(
+      (acc: any, h) => {
+        acc[h.name] = h.value;
+        return acc;
+      },
+      { Host: hostname }
+    );
+
+    headers["Accept-Encoding"] = "identity";
+    headers["Connection"] = "close";
+
+    const regex = /luma\.auth-session-key=usr-[^;]*\./;
+
+    console.log("Cookies: ", headers["Cookie"]);
+
+    const authSessionKey = headers["Cookie"].match(regex);
+
+    if (!authSessionKey) {
+      console.error("Auth Session Key not found");
+      setLoading(false);
+      return;
+    }
+
+    const userId = String(authSessionKey[0]).replace("luma.auth-session-key=", "").replace(".", "");
+
+    setLoading(false);
+
+    setUserLumaId(userId);
+  }, [req, setUserLumaId]);
+
+  const handleLumaNotarizeRequest = useCallback(async () => {
+    setLoading(true);
+    if (!filteredRequests || filteredRequests.length === 0) return;
+
+    if (!req) return;
+
+    console.log("Request: ", req);
+
+    const hostname = urlify(req.url)?.hostname;
+
+    const headers: { [k: string]: string } = req.requestHeaders.reduce(
+      (acc: any, h) => {
+        acc[h.name] = h.value;
+        return acc;
+      },
+      { Host: hostname }
+    );
+
+    headers["Accept-Encoding"] = "identity";
+    headers["Connection"] = "close";
+
+    console.log("Headers: ", headers);
+
+    await set_logging_filter('info,tlsn_extension_rs=debug');
+    const p = await prove('https://api.lu.ma/event/get-guest-list?event_api_id=evt-tJwTPSmFkANHUEn&ticket_key=D2uFSI&pagination_limit=100', {
+      method: 'GET',
+      maxTranscriptSize: 16384,
+      notaryUrl: 'http://localhost:7047',
+      websocketProxyUrl: 'ws://localhost:55688',
+    });
+
+    console.log("Proof: ", p);
+
+    const r = await verify(p);
+
+    console.log("Verify: ", r);
+
+    setProofData(p);
+
+    setUserLumaProof(p);
+    setLoading(false);
+  }, [req, setUserLumaProof, setLoading]);
+
+  const handleLumaVerifyRequest = useCallback(async () => {
+    setLoading(true);
+    if (!filteredRequests || filteredRequests.length === 0) return;
+
+    if (!req) return;
+
+    console.log("Request: ", req);
+
+    const hostname = urlify(req.url)?.hostname;
+
+    const headers: { [k: string]: string } = req.requestHeaders.reduce(
+      (acc: any, h) => {
+        acc[h.name] = h.value;
+        return acc;
+      },
+      { Host: hostname }
+    );
+
+    headers["Accept-Encoding"] = "identity";
+    headers["Connection"] = "close";
+
+    console.log("userLumaProof: ", userLumaProof);
+
+    const r = await verify(userLumaProof);
+
+    console.log("Verify: ", r);
+
+    
+    setLoading(false);
+  
+  }, [req, setLoading]);
+
+
+
+
+
   const handleNotarizeRequest = useCallback(async () => {
     setLoading(true);
     if (!filteredRequests || filteredRequests.length === 0) return;
@@ -270,6 +425,8 @@ function RequestBody(props: {
     console.log("Request: ", req);
 
     const hostname = urlify(req.url)?.hostname;
+
+
     const headers: { [k: string]: string } = req.requestHeaders.reduce(
       (acc: any, h) => {
         acc[h.name] = h.value;
@@ -385,12 +542,16 @@ function RequestBody(props: {
             setProcessStepId={setProcessStepId}
             currentUrl={currentUrl}
             handleNotarizeRequest={handleNotarizeRequest}
+            handleLumaPing={handleLumaPing}
+            handleLumaNotarizeRequest={handleLumaNotarizeRequest}
+            handleLumaVerifyRequest={handleLumaVerifyRequest}
             loading={loading}
             {...step}
           />
         ))}
       </div>
       <div className="w-full flex flex-col items-start gap-4 mt-6">
+        {type == "revolut" && 
         <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px] border-primary rounded-md">
           <p className="text-lightcolor truncate">
             <span className="font-bold">Transaction ID: </span>
@@ -411,7 +572,7 @@ function RequestBody(props: {
             <span className="font-bold">Proof: </span>
             {txProof}
           </p>
-        </div>
+        </div>}
         <div className="flex flex-row text-base w-full">
           {/* <div className="text-lightcolor self-start">
             {steps[type]?.length + 1}
@@ -421,7 +582,7 @@ function RequestBody(props: {
               onClick={handleSendProof}
               className="w-full text-sm py-2 text-darkcolor"
             >
-              Send Proof to Z2Z
+              Send Proof to {type == "revolut"? "Z2Z" : "Zap Market"}
             </ZapButton>
           </div>
         </div>
@@ -437,6 +598,9 @@ function StepContent(
     setProcessStepId: any;
     currentUrl: string;
     handleNotarizeRequest: () => void;
+    handleLumaPing: () => void;
+    handleLumaNotarizeRequest: () => void;
+    handleLumaVerifyRequest: () => void;
     loading: boolean;
   }
 ): ReactElement {
@@ -451,6 +615,9 @@ function StepContent(
     setProcessStepId,
     currentUrl,
     handleNotarizeRequest,
+    handleLumaPing,
+    handleLumaNotarizeRequest,
+    handleLumaVerifyRequest,
     loading,
   } = props;
   const [completed, setCompleted] = useState(false);
@@ -493,6 +660,21 @@ function StepContent(
         setCompleted(true);
         setProcessStepId(processStepId + 1);
         // Dummy function for Verify
+      } else if(action === "Ping") {
+        console.log("Ping action triggered");
+        await handleLumaPing();
+        setCompleted(true);
+        setProcessStepId(processStepId + 1);
+      } else if(action === "NotarizeLuma") {
+        console.log("Notarize Luma action triggered");
+        await handleLumaNotarizeRequest();
+        setCompleted(true);
+        setProcessStepId(processStepId + 1);
+      } else if(action === "VerifyLuma") {
+        console.log("Verify Luma action triggered");
+        await handleLumaVerifyRequest();
+        setCompleted(true);
+        setProcessStepId(processStepId + 1);
       }
     } catch (e: any) {
       console.error(e);
@@ -539,7 +721,7 @@ function StepContent(
         <ZapButton
           onClick={handleClick}
           disabled={completed || pending || loading}
-          loading={loading && action === "Verify"}
+          loading={loading && (action === "Verify" || action === "NotarizeLuma")}
           className={`w-full text-sm py-2 mt-4 text-darkcolor ${
             completed
               ? "disabled:bg-green-300 disabled:hover:bg-green-300 disabled:text-gray-500"
