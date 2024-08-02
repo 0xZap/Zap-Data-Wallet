@@ -19,6 +19,14 @@
   "icons": {
     "128": "assets/icon-128.png"
   },
+  "oauth2": {
+    "client_id": "17528040277-gk0ou09af7r1pla0f9grnf5p9u038sfu.apps.googleusercontent.com",
+    "scopes": [
+      "openid",
+      "profile",
+      "email"
+    ]
+  },
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   },
@@ -35,12 +43,16 @@
       "matches": ["http://*/*", "https://*/*", "<all_urls>"]
     }
   ],
-  "host_permissions": ["<all_urls>"],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "permissions": [
     "offscreen",
     "storage",
     "webRequest",
     "activeTab",
-    "sidePanel"
+    "sidePanel",
+    "identity",
+    "identity.email"
   ]
 }

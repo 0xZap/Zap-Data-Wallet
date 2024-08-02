@@ -33,6 +33,7 @@ import {
 import { BackgroundActiontype } from "../../entries/Background/rpc";
 import browser from "webextension-polyfill";
 import store from "../../utils/store";
+import SignIn from "../../pages/SignIn";
 
 const Popup = () => {
   const dispatch = useDispatch();
@@ -40,6 +41,10 @@ const Popup = () => {
 
   const isAuthenticated = useSelector(
     (state: AppRootState) => state.auth.isAuthenticated
+  );
+
+  const authToken = useSelector(
+    (state: AppRootState) => state.auth.token
   );
 
   useEffect(() => {
@@ -102,7 +107,7 @@ const Popup = () => {
       <Routes>
         <Route
           path="/login"
-          element={isAuthenticated ? <Navigate to="/home" /> : <Login />}
+          element={authToken ? <Navigate to="/home" /> : <SignIn />}
         />
         <Route
           path="/home"
