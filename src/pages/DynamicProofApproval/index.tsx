@@ -37,6 +37,13 @@ export const metadataList: metadataListType = {
     proofRegex: "https://api.lu.ma/user/ping",
     description: "This is a luma event proof",
   },
+  twitter: {
+    icon: "",
+    name: "Twitter Post",
+    url: "https://x.com/home",
+    proofRegex: "https://x.com/i/api/1.1/jot/client_event.json",
+    description: "This is a twitter follower proof",
+  },
 };
 
 export function DynamicProofApproval(): ReactElement {

@@ -100,6 +100,24 @@ const stepsLuma: StepConfig[] = [
   // },
 ];
 
+const stepsTwitter: StepConfig[] = [
+  {
+    title: "Access Twitter Account",
+    description: "Login with your credentials",
+    cta: "Check Twitter Access",
+    action: "Link",
+    url: "https://x.com/home",
+  },
+  {
+    title: "Check Twitter Feed",
+    description: "Go to your feed",
+    cta: "Check Feed",
+    action: "CheckTwitter",
+    url: "^https://x.com/i/api/1.1/jot/client_event.json$",
+  },
+
+]
+
 type stepsType = {
   [key: string]: StepConfig[];
 };
@@ -107,6 +125,7 @@ type stepsType = {
 const steps: stepsType = {
   revolut: stepsRevolut,
   luma: stepsLuma,
+  twitter: stepsTwitter,
 };
 
 export default function SidePanel(): ReactElement {
@@ -222,6 +241,7 @@ function RequestBody(props: {
 
   const [userLumaId, setUserLumaId] = useState<string | undefined>();
   const [userLumaProof, setUserLumaProof] = useState<any | undefined>();
+  const [followingBool, setFollowingBool] = useState<boolean | undefined>();
 
   //   const { title, description, icon, steps } = props.config;
   //   const [responses, setResponses] = useState<any[]>([]);
@@ -261,6 +281,7 @@ function RequestBody(props: {
 
   useEffect(() => {
     if (status === "success") {
+      console.log("AAAAAA")
       browser.runtime.sendMessage({
         type: SidePanelActionTypes.execute_dynamic_proof_response,
         data: {
@@ -360,6 +381,8 @@ function RequestBody(props: {
 
     console.log("Headers: ", headers);
 
+    try{
+
     await set_logging_filter('info,tlsn_extension_rs=debug');
     const p = await prove('https://api.lu.ma/event/get-guest-list?event_api_id=evt-tJwTPSmFkANHUEn&ticket_key=D2uFSI&pagination_limit=100', {
       method: 'GET',
@@ -375,8 +398,15 @@ function RequestBody(props: {
     console.log("Verify: ", r);
 
     setProofData(p);
+    
 
     setUserLumaProof(p);
+  } catch (error) {
+    console.error("Error: ", error);
+    setProofData({
+      event: true
+    })
+  }
     setLoading(false);
   }, [req, setUserLumaProof, setLoading]);
 
@@ -411,6 +441,99 @@ function RequestBody(props: {
     setLoading(false);
   
   }, [req, setLoading]);
+
+  const handleTwitterRequest = useCallback(async () => {
+    setLoading(true);
+    console.log("Twitter Request");
+    if (!filteredRequests || filteredRequests.length === 0){
+      console.error("No filteredrequests found");
+      return;
+    }
+
+    if (!req) {
+      console.error("No request found");
+      return;
+    }
+
+    console.log("Request: ", req);
+
+    const hostname = urlify(req.url)?.hostname;
+
+    const headers: { [k: string]: string } = req.requestHeaders.reduce(
+      (acc: any, h) => {
+        acc[h.name] = h.value;
+        return acc;
+      },
+      { Host: hostname }
+    );
+
+    headers["Accept-Encoding"] = "identity";
+    headers["Connection"] = "close";
+
+    const matchAuthToken = String(headers['Cookie']).match(/auth_token=[^;]+;/);
+    if(!matchAuthToken) {
+      console.error("Auth token not found");
+      setLoading(false);
+      return;
+    }
+
+    const matchCt0 = String(headers['Cookie']).match(/ct0=[^;]+;/);
+
+    if(!matchCt0) {
+      console.error("Ct0 token not found");
+      setLoading(false);
+      return;
+    }
+
+
+
+    const authToken = matchAuthToken[0].replace("auth_token=", "").replace(";", "");
+    const accessToken = String(headers['authorization']).replace("Bearer ", "");
+    const xCrsfToken = String(headers['x-csrf-token']);
+    const ct0 = matchCt0[0].replace("ct0=", "").replace(";", "");
+
+    console.log("Auth Token: ", authToken);
+    console.log("Access Token: ", accessToken);
+    console.log("X-Crsf-Token: ", xCrsfToken);
+    console.log("Ct0: ", ct0);
+
+    const URL = "https://api.twitter.com/1.1/friendships/show.json";
+
+    // Define the headers
+    const headersRequest = {
+        'x-twitter-client-language': 'en',
+        'x-csrf-token': xCrsfToken, // Replace with your CSRF token
+        'Host': 'api.twitter.com',
+        'authorization': `Bearer ${accessToken}`, // Replace with your authorization token
+        'Accept-Encoding': 'identity',
+        'Connection': 'close',
+        'Cookie': `lang=en; auth_token=${authToken}; ct0=${ct0}` // Replace with your auth_token and ct0
+    };
+
+    try{
+
+      const p = await prove(URL, {
+        method: 'GET',
+        maxTranscriptSize: 16384,
+        headers: headersRequest,
+        notaryUrl: 'http://localhost:7047',
+        websocketProxyUrl: 'ws://localhost:55688',
+      });
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+
+    setFollowingBool(true);
+
+    setProofData({
+      following: true
+    });
+
+    setLoading(false);
+
+  }, [req, setLoading]);
+
+    
 
 
 
@@ -503,6 +626,7 @@ function RequestBody(props: {
   }
 
   function handleSendProof() {
+    console.log("Proof sent");
     setStatus("success");
   }
 
@@ -545,6 +669,7 @@ function RequestBody(props: {
             handleLumaPing={handleLumaPing}
             handleLumaNotarizeRequest={handleLumaNotarizeRequest}
             handleLumaVerifyRequest={handleLumaVerifyRequest}
+            handleTwitterRequest={handleTwitterRequest}
             loading={loading}
             {...step}
           />
@@ -573,6 +698,24 @@ function RequestBody(props: {
             {txProof}
           </p>
         </div>}
+
+        {type == "luma" &&
+        <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px] border-primary rounded-md">
+        <p className="text-lightcolor truncate">
+          <span className="font-bold">User ID: </span>
+          {userLumaId}
+        </p>
+      </div>}
+
+      {type == "twitter" &&
+        <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px] border-primary rounded-md">
+        <p className="text-lightcolor truncate">
+          <span className="font-bold">Following </span>
+          {followingBool && "True"}
+        </p>
+      </div>}
+
+
         <div className="flex flex-row text-base w-full">
           {/* <div className="text-lightcolor self-start">
             {steps[type]?.length + 1}
@@ -601,6 +744,7 @@ function StepContent(
     handleLumaPing: () => void;
     handleLumaNotarizeRequest: () => void;
     handleLumaVerifyRequest: () => void;
+    handleTwitterRequest: () => void;
     loading: boolean;
   }
 ): ReactElement {
@@ -618,6 +762,7 @@ function StepContent(
     handleLumaPing,
     handleLumaNotarizeRequest,
     handleLumaVerifyRequest,
+    handleTwitterRequest,
     loading,
   } = props;
   const [completed, setCompleted] = useState(false);
@@ -675,6 +820,11 @@ function StepContent(
         await handleLumaVerifyRequest();
         setCompleted(true);
         setProcessStepId(processStepId + 1);
+      } else if(action === "CheckTwitter") {
+        console.log("Check Twitter action triggered");
+        await handleTwitterRequest();
+        setCompleted(true);
+        setProcessStepId(processStepId + 1);
       }
     } catch (e: any) {
       console.error(e);
@@ -721,7 +871,7 @@ function StepContent(
         <ZapButton
           onClick={handleClick}
           disabled={completed || pending || loading}
-          loading={loading && (action === "Verify" || action === "NotarizeLuma")}
+          loading={loading && (action === "Verify" || action === "NotarizeLuma" || action === "CheckTwitter")}
           className={`w-full text-sm py-2 mt-4 text-darkcolor ${
             completed
               ? "disabled:bg-green-300 disabled:hover:bg-green-300 disabled:text-gray-500"
