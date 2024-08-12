@@ -57,7 +57,6 @@ export async function getProxyApi() {
 }
 
 export async function setAuthToken(token: string): Promise<void> {
-  console.log("setAuthToken", token);
   return set(AUTH_TOKEN_KEY, token);
 }
 

@@ -20,11 +20,10 @@
     "128": "assets/icon-128.png"
   },
   "oauth2": {
-    "client_id": "17528040277-gk0ou09af7r1pla0f9grnf5p9u038sfu.apps.googleusercontent.com",
+    "client_id": "17528040277-mfcjpfmkvluu4o80a2fi315n26t9iup2.apps.googleusercontent.com",
     "scopes": [
-      "openid",
-      "profile",
-      "email"
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
     ]
   },
   "content_security_policy": {
@@ -52,7 +51,6 @@
     "webRequest",
     "activeTab",
     "sidePanel",
-    "identity",
-    "identity.email"
+    "identity"
   ]
 }

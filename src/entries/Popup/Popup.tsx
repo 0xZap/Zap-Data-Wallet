@@ -47,10 +47,14 @@ const Popup = () => {
     (state: AppRootState) => state.auth.token
   );
 
+  const user = useSelector(
+    (state: AppRootState) => state.auth.user
+  )
+
   useEffect(() => {
     getAuthToken().then((token) => {
       if (token) {
-        dispatch(setAuth({ isAuthenticated: true, token }));
+        dispatch(setAuth({ isAuthenticated: true, token, user }));
       }
     });
   }, [dispatch]);

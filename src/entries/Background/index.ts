@@ -41,6 +41,8 @@ import { initRPC } from "./rpc";
   }
 })();
 
+//--------------- Code for Passkey auth (not working) ---------------
+
 interface RegisterRequest {
   action: 'register';
   username: string;
@@ -143,6 +145,8 @@ async function authenticateUser(): Promise<AuthResponse> {
     return { success: false };
   }
 }
+
+//--------------- END of Passkey auth code ---------------
 
 // let creatingOffscreen: any;
 // async function createOffscreenDocument() {
