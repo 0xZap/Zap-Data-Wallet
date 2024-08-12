@@ -32,7 +32,7 @@ import { urlify } from "../../utils/misc";
 import store from "../../utils/store";
 import { useDispatch } from "react-redux";
 import axios from "axios";
-import { prove, verify, set_logging_filter } from 'tlsn-js';
+import { prove, verify, set_logging_filter } from "tlsn-js";
 
 export type StepConfig = {
   title: string;
@@ -115,8 +115,7 @@ const stepsTwitter: StepConfig[] = [
     action: "CheckTwitter",
     url: "^https://x.com/i/api/1.1/jot/client_event.json$",
   },
-
-]
+];
 
 type stepsType = {
   [key: string]: StepConfig[];
@@ -198,15 +197,15 @@ export default function SidePanel(): ReactElement {
 
   return (
     <div className="flex flex-col bg-darkcolor w-screen h-screen overflow-hidden">
-      <div className="relative flex flex-nowrap flex-shrink-0 flex-row items-center gap-2 h-9 p-2 cursor-default justify-center bg-primary w-full">
-        {/* <img className="h-5" src={logo} alt="logo" /> */}
+      {/* <div className="relative flex flex-nowrap flex-shrink-0 flex-row items-center gap-2 h-9 p-2 cursor-default justify-center bg-primary w-full">
+        <img className="h-5" src={logo} alt="logo" />
         <button
           className="button absolute right-2 text-darkcolor"
           onClick={() => window.close()}
         >
           Close
         </button>
-      </div>
+      </div> */}
       {/* {!config && <PluginList />}
       {config && <PluginBody hash={hash} config={config} />} */}
       <div className="flex-1 overflow-y-auto">
@@ -237,7 +236,6 @@ function RequestBody(props: {
   const [filteredRequests, setFilteredRequests] = useState<RequestLog[]>([]);
   const req = useRequest(requestId);
   const [loading, setLoading] = useState(false);
-
 
   const [userLumaId, setUserLumaId] = useState<string | undefined>();
   const [userLumaProof, setUserLumaProof] = useState<any | undefined>();
@@ -281,7 +279,7 @@ function RequestBody(props: {
 
   useEffect(() => {
     if (status === "success") {
-      console.log("AAAAAA")
+      console.log("AAAAAA");
       browser.runtime.sendMessage({
         type: SidePanelActionTypes.execute_dynamic_proof_response,
         data: {
@@ -327,7 +325,6 @@ function RequestBody(props: {
     console.log("headers: ", req.requestHeaders);
     const hostname = urlify(req.url)?.hostname;
 
-
     const headers: { [k: string]: string } = req.requestHeaders.reduce(
       (acc: any, h) => {
         acc[h.name] = h.value;
@@ -351,7 +348,9 @@ function RequestBody(props: {
       return;
     }
 
-    const userId = String(authSessionKey[0]).replace("luma.auth-session-key=", "").replace(".", "");
+    const userId = String(authSessionKey[0])
+      .replace("luma.auth-session-key=", "")
+      .replace(".", "");
 
     setLoading(false);
 
@@ -381,32 +380,33 @@ function RequestBody(props: {
 
     console.log("Headers: ", headers);
 
-    try{
+    try {
+      await set_logging_filter("info,tlsn_extension_rs=debug");
+      const p = await prove(
+        "https://api.lu.ma/event/get-guest-list?event_api_id=evt-tJwTPSmFkANHUEn&ticket_key=D2uFSI&pagination_limit=100",
+        {
+          method: "GET",
+          maxTranscriptSize: 16384,
+          notaryUrl: "http://localhost:7047",
+          websocketProxyUrl: "ws://localhost:55688",
+        }
+      );
 
-    await set_logging_filter('info,tlsn_extension_rs=debug');
-    const p = await prove('https://api.lu.ma/event/get-guest-list?event_api_id=evt-tJwTPSmFkANHUEn&ticket_key=D2uFSI&pagination_limit=100', {
-      method: 'GET',
-      maxTranscriptSize: 16384,
-      notaryUrl: 'http://localhost:7047',
-      websocketProxyUrl: 'ws://localhost:55688',
-    });
+      console.log("Proof: ", p);
 
-    console.log("Proof: ", p);
+      const r = await verify(p);
 
-    const r = await verify(p);
+      console.log("Verify: ", r);
 
-    console.log("Verify: ", r);
+      setProofData(p);
 
-    setProofData(p);
-    
-
-    setUserLumaProof(p);
-  } catch (error) {
-    console.error("Error: ", error);
-    setProofData({
-      event: true
-    })
-  }
+      setUserLumaProof(p);
+    } catch (error) {
+      console.error("Error: ", error);
+      setProofData({
+        event: true,
+      });
+    }
     setLoading(false);
   }, [req, setUserLumaProof, setLoading]);
 
@@ -437,15 +437,13 @@ function RequestBody(props: {
 
     console.log("Verify: ", r);
 
-    
     setLoading(false);
-  
   }, [req, setLoading]);
 
   const handleTwitterRequest = useCallback(async () => {
     setLoading(true);
     console.log("Twitter Request");
-    if (!filteredRequests || filteredRequests.length === 0){
+    if (!filteredRequests || filteredRequests.length === 0) {
       console.error("No filteredrequests found");
       return;
     }
@@ -470,26 +468,26 @@ function RequestBody(props: {
     headers["Accept-Encoding"] = "identity";
     headers["Connection"] = "close";
 
-    const matchAuthToken = String(headers['Cookie']).match(/auth_token=[^;]+;/);
-    if(!matchAuthToken) {
+    const matchAuthToken = String(headers["Cookie"]).match(/auth_token=[^;]+;/);
+    if (!matchAuthToken) {
       console.error("Auth token not found");
       setLoading(false);
       return;
     }
 
-    const matchCt0 = String(headers['Cookie']).match(/ct0=[^;]+;/);
+    const matchCt0 = String(headers["Cookie"]).match(/ct0=[^;]+;/);
 
-    if(!matchCt0) {
+    if (!matchCt0) {
       console.error("Ct0 token not found");
       setLoading(false);
       return;
     }
 
-
-
-    const authToken = matchAuthToken[0].replace("auth_token=", "").replace(";", "");
-    const accessToken = String(headers['authorization']).replace("Bearer ", "");
-    const xCrsfToken = String(headers['x-csrf-token']);
+    const authToken = matchAuthToken[0]
+      .replace("auth_token=", "")
+      .replace(";", "");
+    const accessToken = String(headers["authorization"]).replace("Bearer ", "");
+    const xCrsfToken = String(headers["x-csrf-token"]);
     const ct0 = matchCt0[0].replace("ct0=", "").replace(";", "");
 
     console.log("Auth Token: ", authToken);
@@ -501,23 +499,22 @@ function RequestBody(props: {
 
     // Define the headers
     const headersRequest = {
-        'x-twitter-client-language': 'en',
-        'x-csrf-token': xCrsfToken, // Replace with your CSRF token
-        'Host': 'api.twitter.com',
-        'authorization': `Bearer ${accessToken}`, // Replace with your authorization token
-        'Accept-Encoding': 'identity',
-        'Connection': 'close',
-        'Cookie': `lang=en; auth_token=${authToken}; ct0=${ct0}` // Replace with your auth_token and ct0
+      "x-twitter-client-language": "en",
+      "x-csrf-token": xCrsfToken, // Replace with your CSRF token
+      Host: "api.twitter.com",
+      authorization: `Bearer ${accessToken}`, // Replace with your authorization token
+      "Accept-Encoding": "identity",
+      Connection: "close",
+      Cookie: `lang=en; auth_token=${authToken}; ct0=${ct0}`, // Replace with your auth_token and ct0
     };
 
-    try{
-
+    try {
       const p = await prove(URL, {
-        method: 'GET',
+        method: "GET",
         maxTranscriptSize: 16384,
         headers: headersRequest,
-        notaryUrl: 'http://localhost:7047',
-        websocketProxyUrl: 'ws://localhost:55688',
+        notaryUrl: "http://localhost:7047",
+        websocketProxyUrl: "ws://localhost:55688",
       });
     } catch (error) {
       console.error("Error: ", error);
@@ -526,18 +523,11 @@ function RequestBody(props: {
     setFollowingBool(true);
 
     setProofData({
-      following: true
+      following: true,
     });
 
     setLoading(false);
-
   }, [req, setLoading]);
-
-    
-
-
-
-
 
   const handleNotarizeRequest = useCallback(async () => {
     setLoading(true);
@@ -548,7 +538,6 @@ function RequestBody(props: {
     console.log("Request: ", req);
 
     const hostname = urlify(req.url)?.hostname;
-
 
     const headers: { [k: string]: string } = req.requestHeaders.reduce(
       (acc: any, h) => {
@@ -676,45 +665,47 @@ function RequestBody(props: {
         ))}
       </div>
       <div className="w-full flex flex-col items-start gap-4 mt-6">
-        {type == "revolut" && 
-        <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px] border-primary rounded-md">
-          <p className="text-lightcolor truncate">
-            <span className="font-bold">Transaction ID: </span>
-            {txId}
-          </p>
-          <p className="text-lightcolor truncate">
-            <span className="font-bold">Currency: </span>
-            {txCurrency}
-          </p>
-          <p className="text-lightcolor truncate">
-            <span className="font-bold">Amount: </span> ${" "}
-            {divideAndFormat(txAmount ?? "0")}
-          </p>
-          <p className="text-lightcolor truncate">
-            <span className="font-bold">Recipient: </span> @{txRecipient}
-          </p>
-          <p className="text-lightcolor truncate">
-            <span className="font-bold">Proof: </span>
-            {txProof}
-          </p>
-        </div>}
+        {type == "revolut" && (
+          <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px] border-secondary rounded-md">
+            <p className="text-lightcolor truncate">
+              <span className="font-bold">Transaction ID: </span>
+              {txId}
+            </p>
+            <p className="text-lightcolor truncate">
+              <span className="font-bold">Currency: </span>
+              {txCurrency}
+            </p>
+            <p className="text-lightcolor truncate">
+              <span className="font-bold">Amount: </span> ${" "}
+              {divideAndFormat(txAmount ?? "0")}
+            </p>
+            <p className="text-lightcolor truncate">
+              <span className="font-bold">Recipient: </span> @{txRecipient}
+            </p>
+            <p className="text-lightcolor truncate">
+              <span className="font-bold">Proof: </span>
+              {txProof}
+            </p>
+          </div>
+        )}
 
-        {type == "luma" &&
-        <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px] border-primary rounded-md">
-        <p className="text-lightcolor truncate">
-          <span className="font-bold">User ID: </span>
-          {userLumaId}
-        </p>
-      </div>}
+        {type == "luma" && (
+          <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px]  border-secondary  rounded-md">
+            <p className="text-lightcolor truncate">
+              <span className="font-bold">User ID: </span>
+              {userLumaId}
+            </p>
+          </div>
+        )}
 
-      {type == "twitter" &&
-        <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px] border-primary rounded-md">
-        <p className="text-lightcolor truncate">
-          <span className="font-bold">Following </span>
-          {followingBool && "True"}
-        </p>
-      </div>}
-
+        {type == "twitter" && (
+          <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px]  border-secondary rounded-md">
+            <p className="text-lightcolor truncate">
+              <span className="font-bold">Following </span>
+              {followingBool && "True"}
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-row text-base w-full">
           {/* <div className="text-lightcolor self-start">
@@ -723,9 +714,9 @@ function RequestBody(props: {
           <div className="flex flex-col flex-grow flex-shrink w-0">
             <ZapButton
               onClick={handleSendProof}
-              className="w-full text-sm py-2 text-darkcolor"
+              className="w-full text-sm py-2 text-lightcolor"
             >
-              Send Proof to {type == "revolut"? "Z2Z" : "Zap Market"}
+              Send Proof to {type == "revolut" ? "Z2Z" : "Zap Market"}
             </ZapButton>
           </div>
         </div>
@@ -805,22 +796,22 @@ function StepContent(
         setCompleted(true);
         setProcessStepId(processStepId + 1);
         // Dummy function for Verify
-      } else if(action === "Ping") {
+      } else if (action === "Ping") {
         console.log("Ping action triggered");
         await handleLumaPing();
         setCompleted(true);
         setProcessStepId(processStepId + 1);
-      } else if(action === "NotarizeLuma") {
+      } else if (action === "NotarizeLuma") {
         console.log("Notarize Luma action triggered");
         await handleLumaNotarizeRequest();
         setCompleted(true);
         setProcessStepId(processStepId + 1);
-      } else if(action === "VerifyLuma") {
+      } else if (action === "VerifyLuma") {
         console.log("Verify Luma action triggered");
         await handleLumaVerifyRequest();
         setCompleted(true);
         setProcessStepId(processStepId + 1);
-      } else if(action === "CheckTwitter") {
+      } else if (action === "CheckTwitter") {
         console.log("Check Twitter action triggered");
         await handleTwitterRequest();
         setCompleted(true);
@@ -871,10 +862,15 @@ function StepContent(
         <ZapButton
           onClick={handleClick}
           disabled={completed || pending || loading}
-          loading={loading && (action === "Verify" || action === "NotarizeLuma" || action === "CheckTwitter")}
-          className={`w-full text-sm py-2 mt-4 text-darkcolor ${
+          loading={
+            loading &&
+            (action === "Verify" ||
+              action === "NotarizeLuma" ||
+              action === "CheckTwitter")
+          }
+          className={`w-full text-sm py-2 mt-4 text-lightcolor ${
             completed
-              ? "disabled:bg-green-300 disabled:hover:bg-green-300 disabled:text-gray-500"
+              ? "disabled:bg-green-100 disabled:hover:bg-green-100 disabled:text-gray-500"
               : ""
           }`}
         >

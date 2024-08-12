@@ -15,7 +15,7 @@ const ZapButton: React.FC<ZapButtonProps> = ({
   ...rest
 }) => {
   const mergedClassName = twMerge(
-    "px-4 py-3 bg-secondary text-white font-semibold rounded-md shadow-md hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-75 transition all duration-500 cubic-bezier(0.4, 0, 0.2, 1) disabled:bg-gray-400 disabled:hover:bg-gray-400 disabled:text-gray-100 disabled:cursor-not-allowed",
+    "px-4 py-3 bg-secondary text-white font-semibold rounded-md shadow-md hover:bg-[#4C8568] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-75 transition all duration-500 cubic-bezier(0.4, 0, 0.2, 1) disabled:bg-black/15 disabled:backdrop-blur-md disabled:hover:bg-black/15 disabled:text-gray-100 disabled:cursor-not-allowed",
     className
   );
 

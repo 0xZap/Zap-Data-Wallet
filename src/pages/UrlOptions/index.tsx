@@ -40,16 +40,26 @@ const UrlOptions = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2 flex-nowrap overflow-y-auto py-4 px-24 text-white">
-      {labels.map((label, index) => (
-        <div key={index} className="flex flex-row space-x-4 items-center">
-          <ZapToggle
-            isOn={urls.includes(label.url)}
-            onToggle={(isOn) => handleToggle(label, isOn)}
-          />
-          <p className="text-lg text-darkcolor">{label.name}</p>
-        </div>
-      ))}
+    <div className="p-4 w-full flex flex-col flex-nowrap justify-center">
+      <div className="w-full flex justify-start">
+        <img
+          src="../../assets/zap-logo.png"
+          alt="Logo"
+          className="w-auto h-8"
+        />
+      </div>
+      <h1 className="text-xl text-lightcolor mt-4">Auto Enabler</h1>
+      <div className="flex flex-col gap-2 flex-nowrap overflow-y-auto px-20 py-4 mt-2 shadow-xl bg-black/10 backdrop-blur-md rounded-md">
+        {labels.map((label, index) => (
+          <div key={index} className="flex flex-row space-x-4 items-center">
+            <ZapToggle
+              isOn={urls.includes(label.url)}
+              onToggle={(isOn) => handleToggle(label, isOn)}
+            />
+            <p className="text-lightcolor font-bold">{label.name}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
