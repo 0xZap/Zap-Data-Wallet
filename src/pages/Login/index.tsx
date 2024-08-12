@@ -22,7 +22,7 @@ export default function Login(): ReactElement {
     if (password === "123456") {
       const token = "user-auth-token"; // Normalmente, você obteria isso do servidor após a autenticação bem-sucedida
       setAuthToken(token);
-      dispatch(setAuth({ isAuthenticated: true, token }));
+      dispatch(setAuth({ isAuthenticated: true, token, user: null }));
       navigate("/home"); // Redirecionar para a página principal após login
     } else {
       alert("Senha incorreta");

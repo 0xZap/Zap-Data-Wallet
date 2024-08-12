@@ -33,7 +33,7 @@ export default function Home(): ReactElement {
       <div className="relative z-10 text-center text-darkcolor p-4 w-full flex flex-col flex-nowrap justify-center">
         <div className="w-full">
           <h1>User - {userDetails?.displayName}</h1>
-          <h1>TEST AREA FOR ACTIVE TAB:</h1>
+          <h1>TEST AREA FOR ACTIVE TABS:</h1>
           <div className="w-full flex flex-row items-center justify-center space-x-2 py-6">
             {!!activeTab?.favIconUrl && (
               <img
