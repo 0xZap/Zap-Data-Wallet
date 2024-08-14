@@ -8,6 +8,7 @@ export const MAX_RECEIVED_LS_KEY = "max-received";
 export const LOGGING_FILTER_KEY = "logging-filter";
 export const URL_PATTERNS_LS_KEY = "url-patterns";
 export const AUTH_TOKEN_KEY = "auth-token";
+export const PASSWORD_KEY = "password";
 
 // const SECRET_KEY = "your-secret-key";
 
@@ -57,13 +58,19 @@ export async function getProxyApi() {
 }
 
 export async function setAuthToken(token: string): Promise<void> {
-  console.log("setAuthToken", token);
   return set(AUTH_TOKEN_KEY, token);
 }
 
 export async function getAuthToken(): Promise<string | null> {
-  console.log("getAuthToken");
   return get(AUTH_TOKEN_KEY, null);
+}
+
+export async function setPassword(password: string): Promise<void> {
+  return set(PASSWORD_KEY, password);
+}
+
+export async function getPassword(): Promise<string | null> {
+  return get(PASSWORD_KEY, null);
 }
 
 // export async function getLoggingFilter() {
