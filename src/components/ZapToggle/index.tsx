@@ -14,12 +14,12 @@ function ZapToggle({ isOn, onToggle }: ToggleProps) {
     <div
       onClick={handleToggle}
       className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer shadow-md border-[2px] ${
-        isOn ? "bg-primary border-lightcolor" : "bg-lightcolor border-primary"
+        isOn ? "bg-secondary border-primary" : "bg-primary border-secondary"
       }`}
     >
       <div
         className={`w-4 h-4 rounded-full shadow-md transform transition-transform ${
-          isOn ? "translate-x-5 bg-lightcolor" : "bg-primary"
+          isOn ? "translate-x-5 bg-primary" : "bg-secondary"
         }`}
       ></div>
     </div>

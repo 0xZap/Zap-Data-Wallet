@@ -5,7 +5,10 @@ import Login from "../../pages/Login";
 import UrlOptions from "../../pages/UrlOptions";
 import RequestTable from "../../pages/RequestTable";
 import Layout from "../../pages/Layout";
-import History from "../../pages/History";
+import DynamicHistory from "../../pages/Dynamic";
+import StaticHistory from "../../pages/Static";
+import ExplorationPage from "../../pages/Exploration";
+import TestPage from "../../pages/Test";
 import { ConnectionApproval } from "../../pages/ConnectionApproval";
 import { DynamicProofApproval } from "../../pages/DynamicProofApproval";
 // import {
@@ -59,10 +62,10 @@ const Popup = () => {
 
       dispatch(setRequests(logs));
 
-      // await browser.runtime.sendMessage({
-      //   type: BackgroundActiontype.get_prove_requests,
-      //   data: tab?.id,
-      // });
+      await browser.runtime.sendMessage({
+        type: BackgroundActiontype.get_prove_requests,
+        data: tab?.id,
+      });
     })();
   }, []);
 
@@ -134,11 +137,47 @@ const Popup = () => {
           }
         />
         <Route
-          path="/history"
+          path="/dynamic-history"
           element={
             isAuthenticated ? (
               <Layout>
-                <History />
+                <DynamicHistory />
+              </Layout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/static-history"
+          element={
+            isAuthenticated ? (
+              <Layout>
+                <StaticHistory />
+              </Layout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/exploration"
+          element={
+            isAuthenticated ? (
+              <Layout>
+                <ExplorationPage />
+              </Layout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/test"
+          element={
+            isAuthenticated ? (
+              <Layout>
+                <TestPage />
               </Layout>
             ) : (
               <Navigate to="/login" />

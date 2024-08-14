@@ -29,7 +29,11 @@ export default function Login(): ReactElement {
   return (
     <div className="flex items-center justify-center min-h-screen relative overflow-hidden">
       <div className="relative w-full h-full z-10 text-center flex flex-col justify-center text-lightcolor p-4 rounded-lg">
-        <div className="logo mb-4">
+        <span className="shooting-star absolute"></span>
+        <span className="shooting-star absolute"></span>
+        <span className="shooting-star absolute"></span>
+        <span className="shooting-star absolute"></span>
+        <div className="logo mb-8">
           <img
             src="../../assets/zap-text.png"
             alt="Logo"
@@ -44,7 +48,11 @@ export default function Login(): ReactElement {
           onChange={(e) => setPassword(e.target.value)}
           className="w-full mb-4"
         />
-        <ZapButton onClick={handleLogin} className="w-full text-lightcolor">
+        <ZapButton
+          disabled={!password}
+          onClick={handleLogin}
+          className="w-full text-lightcolor z-0"
+        >
           Unlock
         </ZapButton>
       </div>

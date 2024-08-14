@@ -5,12 +5,12 @@ import {
 import { useSelector } from "react-redux";
 import { AppRootState } from "./index";
 import deepEqual from "fast-deep-equal";
-// import {
-//   getNotaryApi,
-//   getProxyApi,
-//   getMaxSent,
-//   getMaxRecv,
-// } from "../utils/storage";
+import {
+  getNotaryApi,
+  getProxyApi,
+  getMaxSent,
+  getMaxRecv,
+} from "../utils/storage";
 import { BackgroundActiontype } from "../entries/Background/rpc";
 import browser from "webextension-polyfill";
 
@@ -44,29 +44,29 @@ export const setRequests = (requests: RequestLog[]): Action<RequestLog[]> => ({
   payload: requests,
 });
 
-//   export const notarizeRequest = (options: RequestHistory) => async () => {
-//     const notaryUrl = await getNotaryApi();
-//     const websocketProxyUrl = await getProxyApi();
-//     const maxSentData = await getMaxSent();
-//     const maxRecvData = await getMaxRecv();
+export const notarizeRequest = (options: RequestHistory) => async () => {
+  const notaryUrl = await getNotaryApi();
+  const websocketProxyUrl = await getProxyApi();
+  const maxSentData = await getMaxSent();
+  const maxRecvData = await getMaxRecv();
 
-//     chrome.runtime.sendMessage<any, string>({
-//       type: BackgroundActiontype.prove_request_start,
-//       data: {
-//         url: options.url,
-//         method: options.method,
-//         headers: options.headers,
-//         body: options.body,
-//         maxTranscriptSize: options.maxTranscriptSize,
-//         maxSentData,
-//         maxRecvData,
-//         secretHeaders: options.secretHeaders,
-//         secretResps: options.secretResps,
-//         notaryUrl,
-//         websocketProxyUrl,
-//       },
-//     });
-//   };
+  chrome.runtime.sendMessage<any, string>({
+    type: BackgroundActiontype.prove_request_start,
+    data: {
+      url: options.url,
+      method: options.method,
+      headers: options.headers,
+      body: options.body,
+      maxTranscriptSize: options.maxTranscriptSize,
+      maxSentData,
+      maxRecvData,
+      secretHeaders: options.secretHeaders,
+      secretResps: options.secretResps,
+      notaryUrl,
+      websocketProxyUrl,
+    },
+  });
+};
 
 export const setActiveTab = (
   activeTab: browser.Tabs.Tab | null

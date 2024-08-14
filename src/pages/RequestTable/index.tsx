@@ -11,18 +11,26 @@ export default function RequestTable(): ReactElement {
   }, [requests]);
 
   return (
-    <div className="flex flex-col flex-nowrap flex-grow p-2 ">
-      <div className="flex-grow overflow-y-auto">
-        <table className="border border-slate-300 border-collapse table-fixed w-full">
-          <thead className="bg-slate-200">
+    <div className="flex flex-col flex-nowrap flex-grow p-4">
+      <div className="w-full flex justify-start">
+        <img
+          src="../../assets/zap-logo.png"
+          alt="Logo"
+          className="w-auto h-8"
+        />
+      </div>
+      <h1 className="text-xl text-lightcolor mt-4">Requests</h1>
+      <div className="flex-grow overflow-y-auto mt-2">
+        <table className="border border-primary border-collapse table-fixed w-full bg-black/15 backdrop-blur-md shadow-xl">
+          <thead className="bg-primary">
             <tr>
-              <th className="border border-slate-300 py-1 px-2 w-2/12">Met</th>
-              <th className="border border-slate-300 py-1 px-2 w-3/12">Type</th>
-              <th className="border border-slate-300 py-1 px-2">Name</th>
+              <th className="border border-primary py-1 px-2 w-2/12">Met</th>
+              <th className="border border-primary py-1 px-2 w-3/12">Type</th>
+              <th className="border border-primary py-1 px-2">Name</th>
             </tr>
           </thead>
           <tbody>
-            {requests.map((r) => {
+            {requests.map((r, index) => {
               let url;
 
               console.log("r.url", r.url);
@@ -33,17 +41,17 @@ export default function RequestTable(): ReactElement {
 
               return (
                 <tr
-                  key={r.requestId}
+                  key={index}
                   onClick={() => navigate("/requests")}
-                  className="cursor-pointer hover:bg-slate-100"
+                  className="cursor-pointer hover:bg-gray-600"
                 >
-                  <td className="border border-slate-200 align-top py-1 px-2 whitespace-nowrap w-2/12 truncate">
+                  <td className="border border-primary align-top py-1 px-2 whitespace-nowrap w-2/12 truncate">
                     {r.method}
                   </td>
-                  <td className="border border-slate-200 align-top py-1 px-2 whitespace-nowrap w-3/12 truncate">
+                  <td className="border border-primary align-top py-1 px-2 whitespace-nowrap w-3/12 truncate">
                     {r.type}
                   </td>
-                  <td className="border border-slate-200 py-1 px-2 break-all truncate">
+                  <td className="border border-primary py-1 px-2 break-all truncate">
                     {url?.pathname}
                   </td>
                 </tr>

@@ -12,7 +12,7 @@ const ZapInput: React.FC<ZapInputProps> = ({
   ...rest
 }) => {
   const mergedClassName = twMerge(
-    "py-3 px-4 text-darkcolor text-[1.25em] rounded-md border border-graycolor transition all duration-500 cubic-bezier(0.4, 0, 0.2, 1)",
+    "py-3 px-4 text-lightcolor bg-black/15 backdrop-blur-md text-[1.25em] rounded-md border-[1px] border-primary placeholder:text-graycolor transition all duration-500 focus:border-lightcolor focus:outline-0 cubic-bezier(0.4, 0, 0.2, 1)",
     className
   );
 
