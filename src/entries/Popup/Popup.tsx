@@ -69,10 +69,10 @@ const Popup = () => {
 
       dispatch(setRequests(logs));
 
-      // await browser.runtime.sendMessage({
-      //   type: BackgroundActiontype.get_prove_requests,
-      //   data: tab?.id,
-      // });
+      await browser.runtime.sendMessage({
+        type: BackgroundActiontype.get_prove_requests,
+        data: tab?.id,
+      });
     })();
   }, []);
 

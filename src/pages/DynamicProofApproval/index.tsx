@@ -9,42 +9,7 @@ import { setList, getList, URL_PATTERNS_LS_KEY } from "../../utils/storage";
 //   getPluginConfigByHash,
 //   getPluginMetadataByHash,
 // } from '../../entries/Background/db';
-
-type DynamicProofMetadata = {
-  icon: string;
-  name: string;
-  url: string;
-  proofRegex: string;
-  description: string;
-};
-
-type metadataListType = {
-  [key: string]: DynamicProofMetadata;
-};
-
-export const metadataList: metadataListType = {
-  revolut: {
-    icon: "",
-    name: "Revolut Transaction",
-    url: "https://app.revolut.com/start",
-    proofRegex: "https://app.revolut.com/api/retail/transaction/\\S+",
-    description: "This is a revolut transaction proof",
-  },
-  luma: {
-    icon: "",
-    name: "Luma Event",
-    url: "https://lu.ma/home",
-    proofRegex: "https://api.lu.ma/user/ping",
-    description: "This is a luma event proof",
-  },
-  twitter: {
-    icon: "",
-    name: "Twitter Post",
-    url: "https://x.com/home",
-    proofRegex: "https://x.com/i/api/1.1/jot/client_event.json",
-    description: "This is a twitter follower proof",
-  },
-};
+import { DynamicProofMetadata, metadataList } from "../../utils/dynamic";
 
 export function DynamicProofApproval(): ReactElement {
   const [params] = useSearchParams();
@@ -59,6 +24,7 @@ export function DynamicProofApproval(): ReactElement {
     url: "",
     proofRegex: "",
     description: "",
+    steps: [],
   });
   const [urls, setUrls] = useState<string[]>([]);
 

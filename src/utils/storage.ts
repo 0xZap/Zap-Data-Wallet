@@ -1,4 +1,4 @@
-// import { LOGGING_LEVEL_INFO } from "./constants";
+import { LOGGING_LEVEL_INFO } from "./constants";
 // import CryptoJS from "crypto-js";
 
 export const NOTARY_API_LS_KEY = "notary-api";
@@ -66,6 +66,6 @@ export async function getAuthToken(): Promise<string | null> {
   return get(AUTH_TOKEN_KEY, null);
 }
 
-// export async function getLoggingFilter() {
-//   return await get(LOGGING_FILTER_KEY, LOGGING_LEVEL_INFO);
-// }
+export async function getLoggingFilter() {
+  return await get(LOGGING_FILTER_KEY, LOGGING_LEVEL_INFO);
+}

@@ -27,105 +27,21 @@ import {
   useRequests,
 } from "../../reducers/requests";
 import { BackgroundActiontype, RequestLog } from "../Background/rpc";
-import { metadataList } from "../../pages/DynamicProofApproval";
+import { StepConfig, metadataList } from "../../utils/dynamic";
 import { urlify } from "../../utils/misc";
 import store from "../../utils/store";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { prove, verify, set_logging_filter } from "tlsn-js";
+import { addRequestHistory } from "../../reducers/history";
+import {
+  addNotaryRequest,
+  getNotaryRequest,
+  setNotaryRequestStatus,
+} from "../Background/db";
+import { getMaxRecv, getMaxSent } from "../../utils/storage";
 
-export type StepConfig = {
-  title: string;
-  description?: string;
-  cta: string;
-  action: string;
-  url?: string;
-};
-
-const stepsRevolut: StepConfig[] = [
-  {
-    title: "Access Revolut Account",
-    description: "Login with your credentials",
-    cta: "Check Revolut Access",
-    action: "Link",
-    url: "^https://app\\.revolut\\.com/home$",
-  },
-  {
-    title: "Access Transaction Info",
-    description: "Go to your transaction details",
-    cta: "Check Transaction Info",
-    action: "Link",
-    url: "^https://app\\.revolut\\.com/transactions/[a-z0-9-]+\\?legId=[a-z0-9-]+&accountId=[a-z0-9-]+$",
-  },
-  // {
-  //   title: "Step 3",
-  //   description: "Description 3",
-  //   cta: "Notarize Request",
-  //   action: "Notarize",
-  // },
-  {
-    title: "Verify Proof",
-    description: "Verify the notarized data received",
-    cta: "Verify",
-    action: "Verify",
-  },
-];
-
-const stepsLuma: StepConfig[] = [
-  {
-    title: "Access Luma Account",
-    description: "Login with your credentials",
-    cta: "Check Luma Access",
-    action: "Ping",
-    url: "https://api.lu.ma/user/ping",
-  },
-  {
-    title: "Proof Event Participation",
-    description: "Go to your event details",
-    cta: "Check Event Info",
-    action: "NotarizeLuma",
-    url: "^https://lu\\.ma/home$",
-  },
-  // {
-  //   title: "Step 3",
-  //   description: "Description 3",
-  //   cta: "Notarize Request",
-  //   action: "Notarize",
-  // },
-  // {
-  //   title: "Verify Proof",
-  //   description: "Verify the notarized data received",
-  //   cta: "Verify",
-  //   action: "VerifyLuma",
-  // },
-];
-
-const stepsTwitter: StepConfig[] = [
-  {
-    title: "Access Twitter Account",
-    description: "Login with your credentials",
-    cta: "Check Twitter Access",
-    action: "Link",
-    url: "https://x.com/home",
-  },
-  {
-    title: "Check Twitter Feed",
-    description: "Go to your feed",
-    cta: "Check Feed",
-    action: "CheckTwitter",
-    url: "^https://x.com/i/api/1.1/jot/client_event.json$",
-  },
-];
-
-type stepsType = {
-  [key: string]: StepConfig[];
-};
-
-const steps: stepsType = {
-  revolut: stepsRevolut,
-  luma: stepsLuma,
-  twitter: stepsTwitter,
-};
+const maxTranscriptSize = 16384;
 
 export default function SidePanel(): ReactElement {
   //   const [config, setConfig] = useState<PluginConfig | null>(null);
@@ -165,10 +81,10 @@ export default function SidePanel(): ReactElement {
 
       dispatch(setRequests(logs));
 
-      // await browser.runtime.sendMessage({
-      //   type: BackgroundActiontype.get_prove_requests,
-      //   data: tab?.id,
-      // });
+      await browser.runtime.sendMessage({
+        type: BackgroundActiontype.get_prove_requests,
+        data: tab?.id,
+      });
     })();
   }, []);
 
@@ -508,16 +424,66 @@ function RequestBody(props: {
       Cookie: `lang=en; auth_token=${authToken}; ct0=${ct0}`, // Replace with your auth_token and ct0
     };
 
+    const maxSentData = await getMaxSent();
+    const maxRecvData = await getMaxRecv();
+    const { id } = await addNotaryRequest(Date.now(), {
+      url: URL,
+      method: "GET",
+      headers: headersRequest,
+      body: "",
+      maxSentData,
+      maxRecvData,
+      maxTranscriptSize,
+      notaryUrl: "http://localhost:7047",
+      websocketProxyUrl: "ws://localhost:55688",
+      secretHeaders: [],
+      secretResps: [],
+    });
+
     try {
-      const p = await prove(URL, {
+      await browser.runtime.sendMessage({
+        type: BackgroundActiontype.store_request,
+        data: {
+          url: URL,
+          method: "GET",
+          headers: headersRequest,
+          body: "",
+          maxSentData,
+          maxRecvData,
+          maxTranscriptSize,
+          notaryUrl: "http://localhost:7047",
+          websocketProxyUrl: "ws://localhost:55688",
+          secretHeaders: [],
+          secretResps: [],
+        },
+      });
+
+      console.log("ENTER PROVING AREA", id);
+
+      const proof = await prove(URL, {
         method: "GET",
         maxTranscriptSize: 16384,
         headers: headersRequest,
         notaryUrl: "http://localhost:7047",
         websocketProxyUrl: "ws://localhost:55688",
       });
+
+      browser.runtime.sendMessage({
+        type: BackgroundActiontype.finish_prove_request,
+        data: {
+          id,
+          proof,
+        },
+      });
     } catch (error) {
       console.error("Error: ", error);
+      browser.runtime.sendMessage({
+        type: BackgroundActiontype.finish_prove_request,
+        data: {
+          id,
+          error,
+        },
+      });
     }
 
     setFollowingBool(true);
@@ -647,7 +613,7 @@ function RequestBody(props: {
         <ZapButton className="w-full" onClick={() => setStatus("error")}>
           Error
         </ZapButton> */}
-        {steps[type]?.map((step, i) => (
+        {metadataList[type].steps?.map((step, i) => (
           <StepContent
             key={i}
             index={i}

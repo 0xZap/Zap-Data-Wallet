@@ -3,6 +3,7 @@ import React, { ReactElement } from "react";
 interface ProofSchema {
   name: string;
   description: string;
+  points: number;
   url: string;
   bool: boolean;
   proof: string;
@@ -24,6 +25,7 @@ const proofTypes: ProofType[] = [
       {
         name: "Google Account",
         description: "Proof of your gmail account",
+        points: 10,
         url: "https://app.revolut.com/api/retail/transaction/\\S+",
         bool: false,
         proof: "",
@@ -38,6 +40,7 @@ const proofTypes: ProofType[] = [
       {
         name: "Chat Simple",
         description: "Proof of a chat interation",
+        points: 10,
         url: "https://api.lu.ma/user/ping",
         bool: false,
         proof: "",
@@ -45,6 +48,7 @@ const proofTypes: ProofType[] = [
       {
         name: "Chat Advanced",
         description: "Proof of a long chat interation",
+        points: 20,
         url: "https://api.lu.ma/user/ping",
         bool: false,
         proof: "",
@@ -59,6 +63,7 @@ const proofTypes: ProofType[] = [
       {
         name: "Post",
         description: "This is a twitter follower proof",
+        points: 10,
         url: "https://x.com/i/api/1.1/jot/client_event.json",
         bool: false,
         proof: "",
@@ -101,15 +106,24 @@ export default function StaticHistory(): ReactElement {
                   key={index}
                   className="w-full p-4 flex flex-row justify-between items-center shadow-xl bg-black/10 backdrop-blur-md rounded-md hover:text-primary hover:bg-secondary transition-all duration-500 ease-in-out cursor-pointer"
                 >
-                  <div className="flex flex-col space-y-1 items-start">
+                  <div className="flex flex-col items-start">
                     <p className="font-bold text-md">{schema.name}</p>
-                    <p className="text-xs text-primary">{schema.description}</p>
+                    <p className="mt-1 text-xs text-primary">
+                      {schema.description}
+                    </p>
+                    <div className="mt-3 text-xs font-bold text-secondary py-1 px-4 bg-primary backdrop-blur-md rounded-md">
+                      Earn +{schema.points} Zaps
+                    </div>
                   </div>
                   <div
-                    className={`w-4 h-4 rounded-full border-2 border-primary ${
-                      schema.bool ? "bg-primary" : "bg-secondary"
+                    className={`py-1 px-4 rounded-md font-bold border-2 border-primary text-xs transition-all duration-500 ease-in-out cursor-pointer ${
+                      schema.bool
+                        ? "bg-primary text-secondary hover:bg-secondary hover:text-primary"
+                        : "bg-secondary text-primary hover:bg-primary hover:text-secondary"
                     }`}
-                  ></div>
+                  >
+                    {schema.bool ? <p>View Proof</p> : <p>Complete</p>}
+                  </div>
                   {/* <div className="rounded-full py-1 px-3 bg-primary text-lightcolor text-sm">
                     View Proof
                   </div> */}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import ZapToggle from "../../components/ZapToggle";
 import { setList, getList, URL_PATTERNS_LS_KEY } from "../../utils/storage";
+import ZapButton from "../../components/ZapButton";
+import { useNavigate } from "react-router-dom";
 
 interface Label {
   name: string;
@@ -17,6 +19,7 @@ const labels: Label[] = [
 
 const UrlOptions = () => {
   const [urls, setUrls] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Carregar URLs do storage
@@ -48,6 +51,9 @@ const UrlOptions = () => {
           className="w-auto h-8"
         />
       </div>
+      <ZapButton className="w-full" onClick={() => navigate("/test")}>
+        TEST
+      </ZapButton>
       <h1 className="text-xl text-lightcolor mt-4">Auto Enabler</h1>
       <div className="flex flex-col gap-2 flex-nowrap overflow-y-auto px-20 py-4 mt-2 shadow-xl bg-black/10 backdrop-blur-md rounded-md">
         {labels.map((label, index) => (

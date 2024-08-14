@@ -22,6 +22,8 @@ export default function TestPage(): ReactElement {
   const activeTab = useActiveTab();
   const url = useActiveTabUrl();
 
+
+
   return (
     <div className="flex items-center justify-center relative overflow-hidden">
       <div className="relative z-10 text-center text-lightcolor p-4 w-full flex flex-col flex-nowrap justify-center">
@@ -45,7 +47,13 @@ export default function TestPage(): ReactElement {
               <span>Requests</span>
               <span>{`(${requests.length})`}</span>
             </p>
-            <ZapButton
+            {/* <ZapButton
+              className="w-full"
+              onClick={() => handleNotarizeTest()}
+            >
+              NOTARIZE TEST
+            </ZapButton> */}
+            {/* <ZapButton
               className="w-full"
               onClick={() => console.log("REQUESTS", requests)}
             >
@@ -59,7 +67,7 @@ export default function TestPage(): ReactElement {
             </ZapButton>
             <ZapButton className="w-full" onClick={() => navigate("/requests")}>
               Requests
-            </ZapButton>
+            </ZapButton> */}
           </div>
         </div>
       </div>

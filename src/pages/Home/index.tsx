@@ -34,7 +34,8 @@ export default function Home(): ReactElement {
       </div>
       <div className="flex flex-col gap-2 flex-nowrap p-4 mt-6 shadow-xl bg-gradient-to-tr from-secondary to-[#4C8568] rounded-md">
         <p className="text-sm text-darkcolor">Total Points</p>
-        <p className="text-2xl font-bold text-darkcolor">100 Zaps</p>
+        {/* let points dynamic */}
+        <p className="text-2xl font-bold text-darkcolor">0 Zaps</p>
       </div>
       <div className="w-full flex flex-col gap-4 flex-nowrap p-4 mt-4 shadow-xl bg-black/10 backdrop-blur-md rounded-md">
         <p>Active tab</p>

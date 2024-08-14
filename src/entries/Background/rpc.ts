@@ -1,22 +1,22 @@
 import browser from "webextension-polyfill";
 import { clearCache, getCacheByTabId, getGlobalCache } from "./cache";
-// import { addRequestHistory } from "../../reducers/history";
+import { addRequestHistory } from "../../reducers/history";
 import {
-  // addNotaryRequest,
-  // addNotaryRequestProofs,
-  // getNotaryRequest,
-  // getNotaryRequests,
-  // removeNotaryRequest,
-  // setNotaryRequestError,
-  // setNotaryRequestStatus,
-  // setNotaryRequestVerification,
+  addNotaryRequest,
+  addNotaryRequestProofs,
+  getNotaryRequest,
+  getNotaryRequests,
+  removeNotaryRequest,
+  setNotaryRequestError,
+  setNotaryRequestStatus,
+  setNotaryRequestVerification,
   // addPlugin,
   // getPluginHashes,
   // getPluginByHash,
   // removePlugin,
   // addPluginConfig,
   // getPluginConfigByHash,
-  getProofConfigByType,
+  // getProofConfigByType,
   // removePluginConfig,
   getConnection,
   setConnection,
@@ -34,17 +34,18 @@ import {
 //   makePlugin,
 //   PluginConfig,
 // } from "../../utils/misc";
-// import {
-//   getLoggingFilter,
-//   getMaxRecv,
-//   getMaxSent,
-//   getNotaryApi,
-//   getProxyApi,
-// } from "../../utils/storage";
+import {
+  getLoggingFilter,
+  // getMaxRecv,
+  // getMaxSent,
+  // getNotaryApi,
+  // getProxyApi,
+} from "../../utils/storage";
 import { deferredPromise } from "../../utils/promise";
 // import { minimatch } from "minimatch";
 // import { OffscreenActionTypes } from "../Offscreen/types";
 import { SidePanelActionTypes } from "../SidePanel/types";
+import { prove, verify, set_logging_filter } from "tlsn-js";
 
 const charwise = require("charwise");
 
@@ -91,6 +92,7 @@ export enum BackgroundActiontype {
   run_plugin_response = "run_plugin_response",
   run_dynamic_proof_request = "run_dynamic_proof_request",
   run_dynamic_proof_response = "run_dynamic_proof_response",
+  store_request = "store_request",
 }
 
 export type BackgroundAction = {
@@ -152,16 +154,18 @@ export const initRPC = () => {
         case BackgroundActiontype.clear_requests:
           // clearCache();
           return sendResponse();
-        // case BackgroundActiontype.get_prove_requests:
-        //   return handleGetProveRequests(request, sendResponse);
-        // case BackgroundActiontype.finish_prove_request:
-        //   return handleFinishProveRequest(request, sendResponse);
-        // case BackgroundActiontype.delete_prove_request:
-        //   return removeNotaryRequest(request.data);
-        // case BackgroundActiontype.retry_prove_request:
-        //   return handleRetryProveReqest(request, sendResponse);
-        // case BackgroundActiontype.prove_request_start:
-        //   return handleProveRequestStart(request, sendResponse);
+        case BackgroundActiontype.get_prove_requests:
+          return handleGetProveRequests(request, sendResponse);
+        case BackgroundActiontype.finish_prove_request:
+          return handleFinishProveRequest(request, sendResponse);
+        case BackgroundActiontype.delete_prove_request:
+          return removeNotaryRequest(request.data);
+        case BackgroundActiontype.retry_prove_request:
+          return handleRetryProveReqest(request, sendResponse);
+        case BackgroundActiontype.store_request:
+          return handleStoreRequest(request, sendResponse);
+        case BackgroundActiontype.prove_request_start:
+          return handleProveRequestStart(request, sendResponse);
         // case BackgroundActiontype.get_cookies_by_hostname:
         //   return handleGetCookiesByHostname(request, sendResponse);
         // case BackgroundActiontype.get_headers_by_hostname:
@@ -221,169 +225,250 @@ function handleGetRequests(
   return true;
 }
 
-// function handleGetProveRequests(
-//   request: BackgroundAction,
-//   sendResponse: (data?: any) => void
-// ): boolean {
-//   getNotaryRequests().then(async (reqs) => {
-//     for (const req of reqs) {
-//       await browser.runtime.sendMessage({
-//         type: BackgroundActiontype.push_action,
-//         data: {
-//           tabId: "background",
-//         },
-//         action: addRequestHistory(req),
-//       });
-//     }
-//     sendResponse(reqs);
-//   });
+function handleGetProveRequests(
+  request: BackgroundAction,
+  sendResponse: (data?: any) => void
+): boolean {
+  getNotaryRequests().then(async (reqs) => {
+    for (const req of reqs) {
+      await browser.runtime.sendMessage({
+        type: BackgroundActiontype.push_action,
+        data: {
+          tabId: "background",
+        },
+        action: addRequestHistory(req),
+      });
+    }
+    sendResponse(reqs);
+  });
 
-//   return true;
-// }
+  return true;
+}
 
-// async function handleFinishProveRequest(
-//   request: BackgroundAction,
-//   sendResponse: (data?: any) => void
-// ) {
-//   const { id, proof, error, verification } = request.data;
+async function handleFinishProveRequest(
+  request: BackgroundAction,
+  sendResponse: (data?: any) => void
+) {
+  const { id, proof, error, verification } = request.data;
 
-//   if (proof) {
-//     const newReq = await addNotaryRequestProofs(id, proof);
-//     if (!newReq) return;
+  if (proof) {
+    const newReq = await addNotaryRequestProofs(id, proof);
+    if (!newReq) return;
 
-//     await browser.runtime.sendMessage({
-//       type: BackgroundActiontype.push_action,
-//       data: {
-//         tabId: "background",
-//       },
-//       action: addRequestHistory(await getNotaryRequest(id)),
-//     });
-//   }
+    await browser.runtime.sendMessage({
+      type: BackgroundActiontype.push_action,
+      data: {
+        tabId: "background",
+      },
+      action: addRequestHistory(await getNotaryRequest(id)),
+    });
+  }
 
-//   if (error) {
-//     const newReq = await setNotaryRequestError(id, error);
-//     if (!newReq) return;
+  if (error) {
+    const newReq = await setNotaryRequestError(id, error);
+    if (!newReq) return;
 
-//     await browser.runtime.sendMessage({
-//       type: BackgroundActiontype.push_action,
-//       data: {
-//         tabId: "background",
-//       },
-//       action: addRequestHistory(await getNotaryRequest(id)),
-//     });
-//   }
+    await browser.runtime.sendMessage({
+      type: BackgroundActiontype.push_action,
+      data: {
+        tabId: "background",
+      },
+      action: addRequestHistory(await getNotaryRequest(id)),
+    });
+  }
 
-//   if (verification) {
-//     const newReq = await setNotaryRequestVerification(id, verification);
-//     if (!newReq) return;
+  if (verification) {
+    const newReq = await setNotaryRequestVerification(id, verification);
+    if (!newReq) return;
 
-//     await browser.runtime.sendMessage({
-//       type: BackgroundActiontype.push_action,
-//       data: {
-//         tabId: "background",
-//       },
-//       action: addRequestHistory(await getNotaryRequest(id)),
-//     });
-//   }
+    await browser.runtime.sendMessage({
+      type: BackgroundActiontype.push_action,
+      data: {
+        tabId: "background",
+      },
+      action: addRequestHistory(await getNotaryRequest(id)),
+    });
+  }
 
-//   return sendResponse();
-// }
+  return sendResponse();
+}
 
-// async function handleRetryProveReqest(
-//   request: BackgroundAction,
-//   sendResponse: (data?: any) => void
-// ) {
-//   const { id, notaryUrl, websocketProxyUrl } = request.data;
+async function handleRetryProveReqest(
+  request: BackgroundAction,
+  sendResponse: (data?: any) => void
+) {
+  const { id, notaryUrl, websocketProxyUrl } = request.data;
 
-//   await setNotaryRequestError(id, null);
-//   await setNotaryRequestStatus(id, "pending");
+  await setNotaryRequestError(id, null);
+  await setNotaryRequestStatus(id, "pending");
 
-//   const req = await getNotaryRequest(id);
+  const req = await getNotaryRequest(id);
 
-//   await browser.runtime.sendMessage({
-//     type: BackgroundActiontype.push_action,
-//     data: {
-//       tabId: "background",
-//     },
-//     action: addRequestHistory(req),
-//   });
+  await browser.runtime.sendMessage({
+    type: BackgroundActiontype.push_action,
+    data: {
+      tabId: "background",
+    },
+    action: addRequestHistory(req),
+  });
 
-//   await browser.runtime.sendMessage({
-//     type: BackgroundActiontype.process_prove_request,
-//     data: {
-//       ...req,
-//       notaryUrl,
-//       websocketProxyUrl,
-//       loggingFilter: await getLoggingFilter(),
-//     },
-//   });
+  await browser.runtime.sendMessage({
+    type: BackgroundActiontype.process_prove_request,
+    data: {
+      ...req,
+      notaryUrl,
+      websocketProxyUrl,
+      loggingFilter: await getLoggingFilter(),
+      // loggingFilter: "",
+    },
+  });
 
-//   return sendResponse();
-// }
+  return sendResponse();
+}
 
-// async function handleProveRequestStart(
-//   request: BackgroundAction,
-//   sendResponse: (data?: any) => void
-// ) {
-//   const {
-//     url,
-//     method,
-//     headers,
-//     body,
-//     maxTranscriptSize,
-//     maxSentData,
-//     maxRecvData,
-//     notaryUrl,
-//     websocketProxyUrl,
-//     secretHeaders,
-//     secretResps,
-//   } = request.data;
+async function handleStoreRequest(
+  request: BackgroundAction,
+  sendResponse: (data?: any) => void
+) {
+  console.log("enter background rpc store request");
 
-//   const { id } = await addNotaryRequest(Date.now(), {
-//     url,
-//     method,
-//     headers,
-//     body,
-//     maxSentData,
-//     maxRecvData,
-//     maxTranscriptSize,
-//     notaryUrl,
-//     websocketProxyUrl,
-//     secretHeaders,
-//     secretResps,
-//   });
+  // const {
+  //   url,
+  //   method,
+  //   headers,
+  //   body,
+  //   id,
+  //   maxTranscriptSize,
+  //   maxSentData,
+  //   maxRecvData,
+  //   notaryUrl,
+  //   websocketProxyUrl,
+  //   secretHeaders,
+  //   secretResps,
+  // } = request.data;
 
-//   await setNotaryRequestStatus(id, "pending");
+  const {
+    // url,
+    // method,
+    // headers,
+    // body,
+    id,
+    // maxTranscriptSize,
+    // maxSentData,
+    // maxRecvData,
+    // notaryUrl,
+    // websocketProxyUrl,
+    // secretHeaders,
+    // secretResps,
+  } = request.data;
 
-//   await browser.runtime.sendMessage({
-//     type: BackgroundActiontype.push_action,
-//     data: {
-//       tabId: "background",
-//     },
-//     action: addRequestHistory(await getNotaryRequest(id)),
-//   });
+  await setNotaryRequestStatus(id, "pending");
 
-//   browser.runtime.sendMessage({
-//     type: BackgroundActiontype.process_prove_request,
-//     data: {
-//       id,
-//       url,
-//       method,
-//       headers,
-//       body,
-//       maxTranscriptSize,
-//       maxSentData,
-//       maxRecvData,
-//       notaryUrl,
-//       websocketProxyUrl,
-//       secretHeaders,
-//       secretResps,
-//       loggingFilter: await getLoggingFilter(),
-//     },
-//   });
+  await browser.runtime.sendMessage({
+    type: BackgroundActiontype.push_action,
+    data: {
+      tabId: "background",
+    },
+    action: addRequestHistory(await getNotaryRequest(id)),
+  });
 
-//   return sendResponse();
-// }
+  // try {
+  //   const proof = await prove(url, {
+  //     method: method,
+  //     maxTranscriptSize: maxTranscriptSize,
+  //     headers: headers,
+  //     notaryUrl: notaryUrl,
+  //     websocketProxyUrl: websocketProxyUrl,
+  //   });
+
+  //   browser.runtime.sendMessage({
+  //     type: BackgroundActiontype.finish_prove_request,
+  //     data: {
+  //       id,
+  //       proof,
+  //     },
+  //   });
+  // } catch (error) {
+  //   console.error("Error: ", error);
+
+  //   browser.runtime.sendMessage({
+  //     type: BackgroundActiontype.finish_prove_request,
+  //     data: {
+  //       id,
+  //       error,
+  //     },
+  //   });
+  // }
+
+  sendResponse(id);
+
+  return true;
+}
+
+async function handleProveRequestStart(
+  request: BackgroundAction,
+  sendResponse: (data?: any) => void
+) {
+  const {
+    url,
+    method,
+    headers,
+    body,
+    maxTranscriptSize,
+    maxSentData,
+    maxRecvData,
+    notaryUrl,
+    websocketProxyUrl,
+    secretHeaders,
+    secretResps,
+  } = request.data;
+
+  const { id } = await addNotaryRequest(Date.now(), {
+    url,
+    method,
+    headers,
+    body,
+    maxSentData,
+    maxRecvData,
+    maxTranscriptSize,
+    notaryUrl,
+    websocketProxyUrl,
+    secretHeaders,
+    secretResps,
+  });
+
+  await setNotaryRequestStatus(id, "pending");
+
+  await browser.runtime.sendMessage({
+    type: BackgroundActiontype.push_action,
+    data: {
+      tabId: "background",
+    },
+    action: addRequestHistory(await getNotaryRequest(id)),
+  });
+
+  browser.runtime.sendMessage({
+    type: BackgroundActiontype.process_prove_request,
+    data: {
+      id,
+      url,
+      method,
+      headers,
+      body,
+      maxTranscriptSize,
+      maxSentData,
+      maxRecvData,
+      notaryUrl,
+      websocketProxyUrl,
+      secretHeaders,
+      secretResps,
+      loggingFilter: await getLoggingFilter(),
+      // loggingFilter: "",
+    },
+  });
+
+  return sendResponse();
+}
 
 // async function runPluginProver(request: BackgroundAction, now = Date.now()) {
 //   const {
