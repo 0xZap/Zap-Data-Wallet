@@ -15,24 +15,17 @@ import {
 } from "../../reducers/requests";
 import ZapButton from "../../components/ZapButton";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { AppRootState } from "../../reducers";
 
 export default function Home(): ReactElement {
   const navigate = useNavigate();
   const requests = useRequests();
   const activeTab = useActiveTab();
   const url = useActiveTabUrl();
-  
-  const userDetails = useSelector(
-    (state: AppRootState) => state.auth.user
-  )
 
   return (
     <div className="flex items-center justify-center min-h-screen relative overflow-hidden bg-lightcolor">
       <div className="relative z-10 text-center text-darkcolor p-4 w-full flex flex-col flex-nowrap justify-center">
         <div className="w-full">
-          <h1>User - {userDetails?.displayName}</h1>
           <h1>TEST AREA FOR ACTIVE TABS:</h1>
           <div className="w-full flex flex-row items-center justify-center space-x-2 py-6">
             {!!activeTab?.favIconUrl && (

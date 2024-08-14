@@ -1,11 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  Navigate,
-  Route,
-  Routes,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Home from "../../pages/Home";
 import Login from "../../pages/Login";
 import UrlOptions from "../../pages/UrlOptions";
@@ -22,18 +16,14 @@ import { DynamicProofApproval } from "../../pages/DynamicProofApproval";
 // } from '../../reducers/requests';
 import { useDispatch } from "react-redux";
 import { setAuth } from "../../reducers/authSlice";
-import { getAuthToken, setAuthToken } from "../../utils/storage";
+import { getPassword } from "../../utils/storage";
 import { useSelector } from "react-redux";
 import { AppRootState } from "../../reducers";
-import {
-  setActiveTab,
-  setRequests,
-  useRequests,
-} from "../../reducers/requests";
+import { setActiveTab, setRequests } from "../../reducers/requests";
 import { BackgroundActiontype } from "../../entries/Background/rpc";
 import browser from "webextension-polyfill";
 import store from "../../utils/store";
-import SignIn from "../../pages/SignIn";
+import CreatePassword from "../../pages/CreatePassword";
 
 const Popup = () => {
   const dispatch = useDispatch();
@@ -43,18 +33,12 @@ const Popup = () => {
     (state: AppRootState) => state.auth.isAuthenticated
   );
 
-  const authToken = useSelector(
-    (state: AppRootState) => state.auth.token
-  );
-
-  const user = useSelector(
-    (state: AppRootState) => state.auth.user
-  )
+  const password = useSelector((state: AppRootState) => state.auth.password);
 
   useEffect(() => {
-    getAuthToken().then((token) => {
-      if (token) {
-        dispatch(setAuth({ isAuthenticated: true, token, user }));
+    getPassword().then((password) => {
+      if (password) {
+        dispatch(setAuth({ isAuthenticated: false, password }));
       }
     });
   }, [dispatch]);
@@ -111,7 +95,7 @@ const Popup = () => {
       <Routes>
         <Route
           path="/login"
-          element={authToken ? <Navigate to="/home" /> : <SignIn />}
+          element={password ? <Login /> : <CreatePassword />}
         />
         <Route
           path="/home"

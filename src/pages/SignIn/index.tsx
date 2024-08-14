@@ -1,3 +1,7 @@
+/*
+Note - Google login page, not used right now and may be useful later
+*/
+
 import React, { ReactElement, useEffect } from "react";
 import "./gradient-animation.css";
 import ZapButton from "../../components/ZapButton";
