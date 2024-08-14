@@ -42,12 +42,15 @@
       "matches": ["http://*/*", "https://*/*", "<all_urls>"]
     }
   ],
-  "host_permissions": ["<all_urls>"],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "permissions": [
     "offscreen",
     "storage",
     "webRequest",
     "activeTab",
-    "sidePanel"
+    "sidePanel",
+    "identity"
   ]
 }

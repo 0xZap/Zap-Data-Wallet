@@ -1,29 +1,26 @@
-import React, {
-  MouseEventHandler,
-  ReactElement,
-  ReactNode,
-  useEffect,
-  useState,
-} from "react";
+import React, { ReactElement, useState } from "react";
 import "./gradient-animation.css";
 import ZapButton from "../../components/ZapButton";
 import ZapInput from "../../components/ZapInput";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setAuth } from "../../reducers/authSlice";
-import { setAuthToken } from "../../utils/storage";
+import { useSelector } from "react-redux";
+import { AppRootState } from "../../reducers";
 
 export default function Login(): ReactElement {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
 
+  const savedPassword = useSelector(
+    (state: AppRootState) => state.auth.password
+  );
+
   const handleLogin = () => {
-    if (password === "123456") {
-      const token = "user-auth-token"; // Normalmente, você obteria isso do servidor após a autenticação bem-sucedida
-      setAuthToken(token);
-      dispatch(setAuth({ isAuthenticated: true, token }));
-      navigate("/home"); // Redirecionar para a página principal após login
+    if (password === savedPassword) {
+      dispatch(setAuth({ isAuthenticated: true, password: savedPassword }));
+      navigate("/home");
     } else {
       alert("Senha incorreta");
     }
@@ -43,7 +40,7 @@ export default function Login(): ReactElement {
             className="w-auto h-24 mx-auto"
           />
         </div>
-        <h1 className="text-xl font-bold mb-4">Unlock the Zap</h1>
+        <h1 className="text-2xl font-bold mb-4">Welcome back!</h1>
         <ZapInput
           type="password"
           placeholder="Enter password"
@@ -58,9 +55,6 @@ export default function Login(): ReactElement {
         >
           Unlock
         </ZapButton>
-        <a href="#" className="block mt-4 text-graycolor">
-          Forgot Password?
-        </a>
       </div>
       <div className="background-animation absolute inset-0 -z-10"></div>
       <div className="bg-black/50 backdrop-blur-lg absolute inset-0 z-0"></div>
