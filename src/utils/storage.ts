@@ -8,6 +8,7 @@ export const MAX_RECEIVED_LS_KEY = "max-received";
 export const LOGGING_FILTER_KEY = "logging-filter";
 export const URL_PATTERNS_LS_KEY = "url-patterns";
 export const AUTH_TOKEN_KEY = "auth-token";
+export const ZAP_POINTS_KEY = "zap-points";
 export const PASSWORD_KEY = "password";
 
 // const SECRET_KEY = "your-secret-key";
@@ -63,6 +64,19 @@ export async function setAuthToken(token: string): Promise<void> {
 
 export async function getAuthToken(): Promise<string | null> {
   return get(AUTH_TOKEN_KEY, null);
+}
+
+// need to fix in the future... maybe put points onchain or even in a server
+export async function setZapPoints(newpts: number): Promise<void> {
+  const currentPoints = await getZapPoints();
+  const updatedPoints = currentPoints + newpts;
+  await set(ZAP_POINTS_KEY, updatedPoints.toString());
+}
+
+// need to fix in the future... maybe put points onchain or even in a server
+export async function getZapPoints(): Promise<number> {
+  const points = await get(ZAP_POINTS_KEY, null);
+  return points ? parseInt(points, 10) : 0;
 }
 
 export async function getLoggingFilter() {

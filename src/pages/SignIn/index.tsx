@@ -32,14 +32,14 @@ export default function SignIn(): ReactElement {
         return;
       }
       signInWithCredential(auth, GoogleAuthProvider.credential(null, token))
-        .then((res) => {
+        .then((res: any) => {
           console.log("User Signed in successfully");
           console.log("User details:", res.user);
           setAuthToken(token);
           dispatch(setAuth({ isAuthenticated: true, token, user: res.user }));
           navigate("/home");
         })
-        .catch((err) => {
+        .catch((err: any) => {
           alert(`ailed to Sign in: ${err}`);
         });
     });
@@ -61,14 +61,18 @@ export default function SignIn(): ReactElement {
   return (
     <div className="flex items-center justify-center min-h-screen relative overflow-hidden">
       <div className="relative w-full h-full z-10 text-center flex flex-col justify-center text-lightcolor p-4 rounded-lg">
-        <div className="logo mb-4">
+        <span className="shooting-star absolute"></span>
+        <span className="shooting-star absolute"></span>
+        <span className="shooting-star absolute"></span>
+        <span className="shooting-star absolute"></span>
+        <div className="logo mb-8">
           <img
             src="../../assets/zap-text.png"
             alt="Logo"
             className="w-auto h-24 mx-auto"
           />
         </div>
-        <h1 className="text-2xl font-bold mb-4">Unlock the Zap</h1>
+        <h1 className="text-xl font-bold mb-4">Unlock the Zap</h1>
         <ZapButton
           onClick={handleGoogleLogin}
           className="w-full text-lightcolor"

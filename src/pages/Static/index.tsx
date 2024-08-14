@@ -1,4 +1,11 @@
 import React, { ReactElement } from "react";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithCredential,
+} from "firebase/auth";
+import { auth } from "../../firebaseConfig";
+import { setZapPoints } from "../../utils/storage";
 
 interface ProofSchema {
   name: string;
@@ -73,6 +80,26 @@ const proofTypes: ProofType[] = [
 ];
 
 export default function StaticHistory(): ReactElement {
+  const handleGoogleLogin = async () => {
+    chrome.identity.getAuthToken({ interactive: true }, (token) => {
+      if (chrome.runtime.lastError || !token) {
+        alert(`Failed to Sign in: ${JSON.stringify(chrome.runtime.lastError)}`);
+        return;
+      }
+      signInWithCredential(auth, GoogleAuthProvider.credential(null, token))
+        .then((res: any) => {
+          console.log("User Signed in successfully");
+          console.log("User details:", res.user);
+          // hardcoded here, need to change to each schema
+          const pointsToAdd = 10;
+          setZapPoints(pointsToAdd);
+        })
+        .catch((err: any) => {
+          alert(`Failed to Sign in: ${err}`);
+        });
+    });
+  };
+
   return (
     <div className="flex flex-col flex-nowrap flex-grow p-4">
       <div className="w-full flex justify-start">
@@ -121,8 +148,15 @@ export default function StaticHistory(): ReactElement {
                         ? "bg-primary text-secondary hover:bg-secondary hover:text-primary"
                         : "bg-secondary text-primary hover:bg-primary hover:text-secondary"
                     }`}
+                    onClick={() => {
+                      if (schema.bool) {
+                        handleGoogleLogin();
+                      } else {
+                        handleGoogleLogin();
+                      }
+                    }}
                   >
-                    {schema.bool ? <p>View Proof</p> : <p>Complete</p>}
+                    {schema.bool ? <p>Completed</p> : <p>Complete</p>}
                   </div>
                   {/* <div className="rounded-full py-1 px-3 bg-primary text-lightcolor text-sm">
                     View Proof

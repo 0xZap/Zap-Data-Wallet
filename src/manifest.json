@@ -20,7 +20,7 @@
     "128": "assets/icon-128.png"
   },
   "oauth2": {
-    "client_id": "17528040277-mfcjpfmkvluu4o80a2fi315n26t9iup2.apps.googleusercontent.com",
+    "client_id": "17528040277-sjm2sibtlucvnj0d7ba3megdu125055a.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/userinfo.profile"
@@ -42,9 +42,7 @@
       "matches": ["http://*/*", "https://*/*", "<all_urls>"]
     }
   ],
-  "host_permissions": [
-    "<all_urls>"
-  ],
+  "host_permissions": ["<all_urls>"],
   "permissions": [
     "offscreen",
     "storage",

@@ -1,7 +1,4 @@
-import React, {
-  ReactElement,
-  useState,
-} from "react";
+import React, { ReactElement, useState } from "react";
 import "./gradient-animation.css";
 import ZapButton from "../../components/ZapButton";
 import ZapInput from "../../components/ZapInput";
@@ -29,6 +26,10 @@ export default function CreatePassword(): ReactElement {
   return (
     <div className="flex items-center justify-center min-h-screen relative overflow-hidden">
       <div className="relative w-full h-full z-10 text-center flex flex-col justify-center text-lightcolor p-4 rounded-lg">
+        <span className="shooting-star absolute"></span>
+        <span className="shooting-star absolute"></span>
+        <span className="shooting-star absolute"></span>
+        <span className="shooting-star absolute"></span>
         <div className="logo mb-4">
           <img
             src="../../assets/zap-text.png"
@@ -37,7 +38,9 @@ export default function CreatePassword(): ReactElement {
           />
         </div>
         <h1 className="text-2xl font-bold mt-1">Create a password</h1>
-        <h5 className="font-bold mb-6">Remember this password to unlock Zap next time</h5>
+        <h5 className="font-bold mb-6">
+          Remember this password to unlock Zap next time
+        </h5>
         <ZapInput
           type="password"
           placeholder="Create password"

@@ -30,7 +30,7 @@
     "crypto-js": "^4.2.0",
     "css-loader": "^7.1.2",
     "file-loader": "^6.2.0",
-    "firebase": "^10.12.4",
+    "firebase": "^10.12.5",
     "fs-extra": "^11.2.0",
     "fuse.js": "^6.6.2",
     "html-loader": "^5.0.0",

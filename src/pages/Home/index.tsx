@@ -3,8 +3,7 @@ import React, {
   ReactElement,
   useEffect,
   // ReactNode,
-  // useEffect,
-  // useState,
+  useState,
 } from "react";
 import {
   // setActiveTab,
@@ -16,12 +15,24 @@ import {
 import ZapButton from "../../components/ZapButton";
 import { useNavigate } from "react-router-dom";
 import { Circle, ShoppingBag, Zap } from "react-feather";
+import { getZapPoints } from "../../utils/storage";
 
 export default function Home(): ReactElement {
   const navigate = useNavigate();
   const requests = useRequests();
   const activeTab = useActiveTab();
   const url = useActiveTabUrl();
+
+  const [zapPoints, setZapPointsState] = useState(0);
+
+  useEffect(() => {
+    async function fetchZapPoints() {
+      const points = await getZapPoints();
+      setZapPointsState(points);
+    }
+
+    fetchZapPoints();
+  }, []);
 
   return (
     <div className="p-4 w-full flex flex-col flex-nowrap justify-center">
@@ -35,7 +46,7 @@ export default function Home(): ReactElement {
       <div className="flex flex-col gap-2 flex-nowrap p-4 mt-6 shadow-xl bg-gradient-to-tr from-secondary to-[#4C8568] rounded-md">
         <p className="text-sm text-darkcolor">Total Points</p>
         {/* let points dynamic */}
-        <p className="text-2xl font-bold text-darkcolor">0 Zaps</p>
+        <p className="text-2xl font-bold text-darkcolor">{zapPoints} Zaps</p>
       </div>
       <div className="w-full flex flex-col gap-4 flex-nowrap p-4 mt-4 shadow-xl bg-black/10 backdrop-blur-md rounded-md">
         <p>Active tab</p>

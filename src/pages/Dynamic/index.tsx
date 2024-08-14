@@ -13,8 +13,8 @@ import { download, urlify } from "../../utils/misc";
 import { BackgroundActiontype } from "../../entries/Background/rpc";
 import Modal, { ModalContent } from "../../components/Modal/Modal";
 import classNames from "classnames";
-import copy from "copy-to-clipboard";
-import { EXPLORER_API } from "../../utils/constants";
+// import copy from "copy-to-clipboard";
+// import { EXPLORER_API } from "../../utils/constants";
 import { getNotaryRequest } from "../../entries/Background/db";
 
 export default function DynamicHistory(): ReactElement {
@@ -34,6 +34,11 @@ export default function DynamicHistory(): ReactElement {
         {history.map((id) => {
           return <OneRequestHistory key={id} requestId={id} />;
         })}
+        {history.length === 0 && (
+          <div className="text-xs italic font-thin">
+            You don&#39;t have any dynamic proofs
+          </div>
+        )}
       </div>
     </div>
   );

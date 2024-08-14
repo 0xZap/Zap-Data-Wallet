@@ -40,7 +40,7 @@ export default function Login(): ReactElement {
             className="w-auto h-24 mx-auto"
           />
         </div>
-        <h1 className="text-2xl font-bold mb-4">Welcome back!</h1>
+        <h1 className="text-xl font-bold mb-4">Welcome back!</h1>
         <ZapInput
           type="password"
           placeholder="Enter password"
