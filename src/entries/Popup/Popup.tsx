@@ -27,6 +27,7 @@ import { BackgroundActiontype } from "../../entries/Background/rpc";
 import browser from "webextension-polyfill";
 import store from "../../utils/store";
 import CreatePassword from "../../pages/CreatePassword";
+import ReclaimPage from "../../pages/Reclaim";
 
 const Popup = () => {
   const dispatch = useDispatch();
@@ -166,6 +167,18 @@ const Popup = () => {
             isAuthenticated ? (
               <Layout>
                 <ExplorationPage />
+              </Layout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/reclaim"
+          element={
+            isAuthenticated ? (
+              <Layout>
+                <ReclaimPage />
               </Layout>
             ) : (
               <Navigate to="/login" />

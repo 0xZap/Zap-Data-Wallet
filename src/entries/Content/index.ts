@@ -15,6 +15,8 @@ import { urlify } from "../../utils/misc";
       },
     });
 
+    console.log("connected in index.ts", connected);
+
     if (!connected) throw new Error("user rejected.");
 
     return connected;

@@ -750,6 +750,8 @@ async function handleConnect(request: BackgroundAction) {
     browser.runtime.onMessage.addListener(onMessage);
     browser.windows.onRemoved.addListener(onPopUpClose);
 
+    console.log("PROMISE", defer.promise);
+
     return defer.promise;
   }
 

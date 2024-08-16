@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement, useState } from "react";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -6,6 +6,9 @@ import {
 } from "firebase/auth";
 import { auth } from "../../firebaseConfig";
 import { setZapPoints } from "../../utils/storage";
+import { Reclaim } from "@reclaimprotocol/js-sdk";
+import QRCode from "react-qr-code";
+import { useNavigate } from "react-router-dom";
 
 interface ProofSchema {
   name: string;
@@ -14,6 +17,7 @@ interface ProofSchema {
   url: string;
   bool: boolean;
   proof: string;
+  index: number;
 }
 
 interface ProofType {
@@ -36,6 +40,23 @@ const proofTypes: ProofType[] = [
         url: "https://app.revolut.com/api/retail/transaction/\\S+",
         bool: false,
         proof: "",
+        index: 0,
+      },
+    ],
+  },
+  {
+    name: "Github",
+    icon: "../../assets/icons/github.png",
+    url: "https://github.com",
+    schemas: [
+      {
+        name: "Github Username",
+        description: "Proof of your github username",
+        points: 10,
+        url: "https://app.revolut.com/api/retail/transaction/\\S+",
+        bool: false,
+        proof: "",
+        index: 1,
       },
     ],
   },
@@ -51,6 +72,7 @@ const proofTypes: ProofType[] = [
         url: "https://api.lu.ma/user/ping",
         bool: false,
         proof: "",
+        index: 1,
       },
       {
         name: "Chat Advanced",
@@ -59,6 +81,7 @@ const proofTypes: ProofType[] = [
         url: "https://api.lu.ma/user/ping",
         bool: false,
         proof: "",
+        index: 1,
       },
     ],
   },
@@ -74,6 +97,7 @@ const proofTypes: ProofType[] = [
         url: "https://x.com/i/api/1.1/jot/client_event.json",
         bool: false,
         proof: "",
+        index: 1,
       },
     ],
   },
@@ -98,6 +122,12 @@ export default function StaticHistory(): ReactElement {
           alert(`Failed to Sign in: ${err}`);
         });
     });
+  };
+
+  const navigate = useNavigate();
+
+  const goToReclaim = (index: number) => {
+    navigate(`/reclaim?index=${index}`);
   };
 
   return (
@@ -150,9 +180,9 @@ export default function StaticHistory(): ReactElement {
                     }`}
                     onClick={() => {
                       if (schema.bool) {
-                        handleGoogleLogin();
+                        goToReclaim(schema.index);
                       } else {
-                        handleGoogleLogin();
+                        goToReclaim(schema.index);
                       }
                     }}
                   >
