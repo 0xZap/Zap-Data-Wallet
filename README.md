@@ -58,7 +58,7 @@ extension/
 
 _need to finish_
 
-## Installing and Running
+## Installing and Running using TLSN
 
 There are 3 code components:
 
@@ -96,6 +96,38 @@ There are 3 code components:
    2. Certify if the host is present on the whitelist domains of TLSN
    3. Run `docker run -it --rm -p 55688:80 novnc/websockify 80 api.x.com:443`
 5. Use it
+
+## Installing and Running using TLS Proxy
+
+There are 3 code components:
+
+- **Local Extension:** Responsible for the client
+- **Local Zap Websocket:** Responsible for handling the request with the server
+
+### Extension Procedures:
+
+1. Check if your [Node.js](https://nodejs.org/) version is >= **18**.
+2. Clone this repository.
+3. Run `npm install` to install the dependencies.
+4. Run `npm start`, it will generate a `build` folder.
+5. Load your extension on Chrome following:
+   1. Access `chrome://extensions/`
+   2. Check `Developer mode`
+   3. Click on `Load unpacked extension`
+   4. Select the `build` folder.
+6. Now use Zap.
+
+### Websocket Procedures:
+
+> [!IMPORTANT]
+> ⚠️ Current version is not safe for private data
+
+1. Fork or clone this repository: [Local Proxy](https://github.com/0xZap/Zap-Proxy)
+2. Go in the javascript implementation in `./js/proxy`.
+3. Run `node proxy.js`.
+5. Now use Zap.
+
+PS.: Current implementation is not using ZK and it's not secure
 
 ## Packing
 
