@@ -56,9 +56,15 @@ extension/
 
 ## Flow Chart
 
+### MPC:
+
+![MPC Flowchart](https://github.com/0xZap/Zap-Data-Wallet/blob/main/Flowchart_DataWalletMPC.png)
+
+### TLS Proxy:
+
 _need to finish_
 
-## Installing and Running using TLSN
+## Installing and Running using MPC
 
 There are 3 code components:
 
@@ -99,7 +105,7 @@ There are 3 code components:
 
 ## Installing and Running using TLS Proxy
 
-There are 3 code components:
+There are 2 code components:
 
 - **Local Extension:** Responsible for the client
 - **Local Zap Websocket:** Responsible for handling the request with the server
@@ -122,7 +128,7 @@ There are 3 code components:
 > [!IMPORTANT]
 > ⚠️ Current version is not safe for private data
 
-1. Fork or clone this repository: [Local Proxy](https://github.com/0xZap/Zap-Proxy)
+1. Fork or clone this repository: [Local Websocket](https://github.com/0xZap/Zap-Proxy)
 2. Go in the javascript implementation in `./js/proxy`.
 3. Run `node proxy.js`.
 5. Now use Zap.
