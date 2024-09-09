@@ -5,6 +5,9 @@ import store from "../../utils/store";
 import { Provider } from "react-redux";
 // import { BackgroundActiontype } from "../Background/rpc";
 
+import process from "process";
+window.process = process;
+
 const container = document.getElementById("app-container");
 const root = createRoot(container!); // createRoot(container!) if you use TypeScript
 

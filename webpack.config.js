@@ -39,6 +39,15 @@ var options = {
     // publicPath: ASSET_PATH,
   },
   resolve: {
+    symlinks: false,
+    fallback: {
+      vm: require.resolve("vm-browserify"),
+      stream: require.resolve("stream-browserify"),
+      crypto: require.resolve("crypto-browserify"),
+      url: require.resolve("url/"),
+      http: require.resolve("stream-http"),
+      process: require.resolve("process/browser"),
+    },
     extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
   module: {

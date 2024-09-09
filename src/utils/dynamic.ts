@@ -113,4 +113,27 @@ export const metadataList: metadataListType = {
       },
     ],
   },
+  spotify: {
+    icon: "",
+    name: "Spotify Tracks",
+    url: "https://open.spotify.com/",
+    proofRegex: "https://api.spotify.com/v1/\\S+",
+    description: "This is a spotify listened tracks proof",
+    steps: [
+      {
+        title: "Access Spotify Account",
+        description: "Login with your credentials",
+        cta: "Check Spotify Access",
+        action: "Link",
+        url: "https://open.spotify.com/",
+      },
+      {
+        title: "Get Listened Tracks",
+        description: "Wait for tracks response",
+        cta: "Check Tracks",
+        action: "CheckSpotify",
+        url: "^https://api.spotify.com/v1/.*$",
+      },
+    ],
+  },
 };

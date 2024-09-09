@@ -40,6 +40,7 @@ import {
   setNotaryRequestStatus,
 } from "../Background/db";
 import { getMaxRecv, getMaxSent } from "../../utils/storage";
+import ZapProxy from "zap-proxy-sdk";
 
 const maxTranscriptSize = 16384;
 
@@ -195,7 +196,6 @@ function RequestBody(props: {
 
   useEffect(() => {
     if (status === "success") {
-      console.log("AAAAAA");
       browser.runtime.sendMessage({
         type: SidePanelActionTypes.execute_dynamic_proof_response,
         data: {
@@ -495,6 +495,78 @@ function RequestBody(props: {
     setLoading(false);
   }, [req, setLoading]);
 
+  const handleSpotifyRequest = useCallback(async () => {
+    setLoading(true);
+    console.log("Spotify Request");
+    if (!filteredRequests || filteredRequests.length === 0) {
+      console.error("No filteredrequests found");
+      return;
+    }
+
+    if (!req) {
+      console.error("No request found");
+      return;
+    }
+
+    console.log("Request: ", req);
+
+    const hostname = urlify(req.url)?.hostname;
+
+    const headers: { [k: string]: string } = req.requestHeaders.reduce(
+      (acc: any, h) => {
+        acc[h.name] = h.value;
+        return acc;
+      },
+      { Host: hostname }
+    );
+
+    headers["Accept-Encoding"] = "identity";
+    headers["Connection"] = "close";
+
+    const accessToken = String(headers["authorization"]).replace("Bearer ", "");
+
+    console.log("Access Token: ", accessToken);
+
+    try {
+      const spotifySchema = {
+        id: "spotify",
+        method: "GET",
+        url: "/v1/me/player/recently-played?limit=10",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Connection: "close",
+        },
+        body: "",
+        proxyHost: "localhost",
+        proxyPort: 55688,
+        targetHost: "api.spotify.com",
+        targetPort: 443,
+      };
+
+      const zapProxy = new ZapProxy(
+        spotifySchema.proxyHost,
+        spotifySchema.proxyPort,
+        spotifySchema.targetHost,
+        spotifySchema.targetPort
+      );
+
+      await zapProxy.connect();
+
+      const proofResponse = await zapProxy.prove(spotifySchema);
+
+      console.log("Signature:", (proofResponse as any).signature);
+      console.log("Proof received:", (proofResponse as any).proofData);
+
+      setProofData(proofResponse);
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+
+    // Need to set the proof data below to be showed
+
+    setLoading(false);
+  }, [req, setLoading]);
+
   const handleNotarizeRequest = useCallback(async () => {
     setLoading(true);
     if (!filteredRequests || filteredRequests.length === 0) return;
@@ -625,6 +697,7 @@ function RequestBody(props: {
             handleLumaNotarizeRequest={handleLumaNotarizeRequest}
             handleLumaVerifyRequest={handleLumaVerifyRequest}
             handleTwitterRequest={handleTwitterRequest}
+            handleSpotifyRequest={handleSpotifyRequest}
             loading={loading}
             {...step}
           />
@@ -655,7 +728,7 @@ function RequestBody(props: {
           </div>
         )}
 
-        {type == "luma" && (
+        {type === "luma" && (
           <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px]  border-secondary  rounded-md">
             <p className="text-lightcolor truncate">
               <span className="font-bold">User ID: </span>
@@ -664,7 +737,7 @@ function RequestBody(props: {
           </div>
         )}
 
-        {type == "twitter" && (
+        {type === "twitter" && (
           <div className="w-full p-4 flex flex-col gap-2 flex-nowrap border-[1px]  border-secondary rounded-md">
             <p className="text-lightcolor truncate">
               <span className="font-bold">Following </span>
@@ -682,7 +755,7 @@ function RequestBody(props: {
               onClick={handleSendProof}
               className="w-full text-sm py-2 text-lightcolor"
             >
-              Send Proof to {type == "revolut" ? "Z2Z" : "Zap Market"}
+              Send Proof
             </ZapButton>
           </div>
         </div>
@@ -702,6 +775,7 @@ function StepContent(
     handleLumaNotarizeRequest: () => void;
     handleLumaVerifyRequest: () => void;
     handleTwitterRequest: () => void;
+    handleSpotifyRequest: () => void;
     loading: boolean;
   }
 ): ReactElement {
@@ -720,6 +794,7 @@ function StepContent(
     handleLumaNotarizeRequest,
     handleLumaVerifyRequest,
     handleTwitterRequest,
+    handleSpotifyRequest,
     loading,
   } = props;
   const [completed, setCompleted] = useState(false);
@@ -782,6 +857,11 @@ function StepContent(
         await handleTwitterRequest();
         setCompleted(true);
         setProcessStepId(processStepId + 1);
+      } else if (action === "CheckSpotify") {
+        console.log("Check Spotify action triggered");
+        await handleSpotifyRequest();
+        setCompleted(true);
+        setProcessStepId(processStepId + 1);
       }
     } catch (e: any) {
       console.error(e);
@@ -832,7 +912,8 @@ function StepContent(
             loading &&
             (action === "Verify" ||
               action === "NotarizeLuma" ||
-              action === "CheckTwitter")
+              action === "CheckTwitter" ||
+              action === "CheckSpotify")
           }
           className={`w-full text-sm py-2 mt-4 text-lightcolor ${
             completed
