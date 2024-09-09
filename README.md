@@ -62,7 +62,19 @@ extension/
 
 ### TLS Proxy:
 
-_need to finish_
+![MPC Flowchart](https://github.com/0xZap/Zap-Data-Wallet/blob/main/Flowchart_DataWalletWebsocket.png)
+
+## Integrating:
+
+1. Starting Zap class provider:
+
+`const client = await zap.connect();`
+
+2. Calling dynanmic proving:
+
+`const response = await (client as any).runDynamicProof("spotify");`
+
+See content script for detailed API functions.
 
 ## Installing and Running using MPC
 
