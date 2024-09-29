@@ -1,6 +1,6 @@
 <img src="src/assets/icon-128.png" width="64"/>
 
-# Chrome Extension (MV3) for Zap
+# Zap Data Wallet
 
 > [!IMPORTANT]
 > ⚠️ When running the extension against a [notary server](https://github.com/tlsnotary/tlsn/tree/dev/notary-server), please ensure that the server's version is the same as the version of this extension
